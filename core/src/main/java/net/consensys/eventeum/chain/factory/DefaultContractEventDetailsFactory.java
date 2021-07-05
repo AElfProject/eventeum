@@ -71,6 +71,10 @@ public class DefaultContractEventDetailsFactory implements ContractEventDetailsF
         eventDetails.setEventSpecificationSignature(Web3jUtil.getSignature(eventSpec));
         eventDetails.setNetworkName(this.networkName);
         eventDetails.setNodeName(eventFilter.getNode());
+        eventDetails.setData(log.getData());
+        eventDetails.setQueueName(eventFilter.getQueueName());
+        eventDetails.setRouterKey(eventFilter.getRouterKey());
+        eventDetails.setTopics(log.getTopics());
 
         if (log.isRemoved()) {
             eventDetails.setStatus(ContractEventStatus.INVALIDATED);

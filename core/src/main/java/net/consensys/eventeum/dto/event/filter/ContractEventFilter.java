@@ -54,4 +54,8 @@ public class ContractEventFilter {
     private CorrelationIdStrategy correlationIdStrategy;
 
     private BigInteger startBlock;
+
+    private String queueName;
+
+    private String routerKey;
 }

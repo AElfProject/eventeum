@@ -80,6 +80,16 @@ public class ContractEventDetails implements TransactionBasedDetails {
 
     private BigInteger timestamp;
 
+    private String data;
+
+    private String queueName;
+
+    private String routerKey;
+
+    @Lob
+    @ElementCollection
+    private List<String> topics;
+
     public String getId() {
         return transactionHash + "-" + blockHash + "-" + logIndex;
     }

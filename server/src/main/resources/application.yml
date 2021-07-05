@@ -3,6 +3,8 @@ server:
     uri-encoding: UTF-8
   port: 8060
 
+# debug: true
+
 logging:
   level:
     org.springframework.web: ERROR
@@ -17,7 +19,7 @@ ethereum:
   nodes:
   - name: default
 #    url: ${ETHEREUM_NODE_URL:wss://mainnet.infura.io/ws/v3/6d00f1fc08d84be7a25d76996d16550b}
-    url: ${ETHEREUM_NODE_URL:http://localhost:8545}
+    url: ${ETHEREUM_NODE_URL:https://kovan.infura.io/v3/4c41b8476e874c178c633ff442a27a1b}
     blockStrategy: POLL
     syncingThreshold: 100
     healthcheckInterval: 5000
@@ -28,24 +30,29 @@ ethereum:
   numBlocksToReplay: 12
   sync:
     batchSize: 100000
+  initialStartBlock: 25817035
 
-#eventFilters:
-#  - id: CryptoKittiesTransfer
-#    contractAddress: "0x06012c8cf97bead5deae237070f9587f8e7a266d"
-#    eventSpecification:
-#      eventName: Transfer
-#      nonIndexedParameterDefinitions:
-#        - position: 0
-#          type: ADDRESS
-#        - position: 1
-#          type: ADDRESS
-#        - position: 2
-#          type: UINT256
-#
-#    correlationId:
-#      type: NON_INDEXED_PARAMETER
-#      index: 2
-#    startBlock: 10330000
+eventFilters:
+  - id: ValueSetOnTest
+    node: default
+    contractAddress: "0x740C31bbd233381cd5FF42621386C9A761D23880"
+    eventSpecification:
+      eventName: ValueSet
+      IndexedParameterDefinitions:
+        - position: 0
+          type: UINT256
+        - position: 1
+          type: INT256
+      NonIndexedParameterDefinitions:
+        - position: 2
+          type: STRING
+        - position: 3
+          type: BYTES4
+    startBlock: 25817035
+    queueName: "Serial-Test"
+    routerKey: "ValueSet-Serial"
+    # queueName: "ValueSetTestQueue"
+    # routerKey: ""
 
 #transactionFilters:
 #- nodeName: ${ETHEREUM_NETWORK:default}
@@ -61,7 +68,7 @@ database:
   type: MONGO
 
 broadcaster:
-  type: KAFKA
+  type: RABBIT
   cache:
     expirationMillis: 6000000
   event:
@@ -72,20 +79,40 @@ broadcaster:
   multiInstance: false
   enableBlockNotifications: true
 
-# For Kafka
-zookeeper:
-  address: ${ZOOKEEPER_ADDRESS:localhost:2181}
-kafka:
-  bootstrap:
-    addresses: ${KAFKA_ADDRESSES:localhost:9092}
-  topic:
-    contractEvents: contract-events
-    blockEvents: block-events
-    eventeumEvents: eventeum-events
-    transactionEvents: transaction-events
+rabbitmq:
+  exchange: ""
+  blockNotification: false
+  routingKey: 
+    contractEvents: testOne
+    blockEvents: EventOne
+    transactionEvents: TxEventOne
 
-    partitions: 1
-    replicationSets: 1
+# broadcaster:
+#   type: KAFKA
+#   cache:
+#     expirationMillis: 6000000
+#   event:
+#     confirmation:
+#       numBlocksToWait: 12
+#       numBlocksToWaitForMissingTx: 100
+#       numBlocksToWaitBeforeInvalidating: 2
+#   multiInstance: false
+#   enableBlockNotifications: true
+
+# For Kafka
+# zookeeper:
+#   address: ${ZOOKEEPER_ADDRESS:localhost:2181}
+# kafka:
+#   bootstrap:
+#     addresses: ${KAFKA_ADDRESSES:localhost:9092}
+#   topic:
+#     contractEvents: contract-events
+#     blockEvents: block-events
+#     eventeumEvents: eventeum-events
+#     transactionEvents: transaction-events
+
+#     partitions: 1
+#     replicationSets: 1
 
 
 

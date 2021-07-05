@@ -52,46 +52,54 @@ public class RabbitBlockChainEventBroadcaster implements BlockchainEventBroadcas
 
     @Override
     public void broadcastNewBlock(BlockDetails block) {
-        final EventeumMessage<BlockDetails> message = createBlockEventMessage(block);
-        rabbitTemplate.convertAndSend(this.rabbitSettings.getExchange(),
-                String.format("%s", this.rabbitSettings.getBlockEventsRoutingKey()),
-                message);
+        // final EventeumMessage<BlockDetails> message = createBlockEventMessage(block);
+        // rabbitTemplate.convertAndSend(this.rabbitSettings.getExchange(),
+        //         String.format("%s", this.rabbitSettings.getBlockEventsRoutingKey()),
+        //         message);
 
-        LOG.info(String.format("New block sent: [%s] to exchange [%s] with routing key [%s]",
-                JSON.stringify(message),
-                this.rabbitSettings.getExchange(),
-                this.rabbitSettings.getBlockEventsRoutingKey())
-        );
+        // LOG.info(String.format("New block sent: [%s] to exchange [%s] with routing key [%s]",
+        //         JSON.stringify(message),
+        //         this.rabbitSettings.getExchange(),
+        //         this.rabbitSettings.getBlockEventsRoutingKey())
+        // );
     }
 
     @Override
     public void broadcastContractEvent(ContractEventDetails eventDetails) {
         final EventeumMessage<ContractEventDetails> message = createContractEventMessage(eventDetails);
-        rabbitTemplate.convertAndSend(this.rabbitSettings.getExchange(),
-                String.format("%s.%s", this.rabbitSettings.getContractEventsRoutingKey(), eventDetails.getFilterId()),
+        // rabbitTemplate.convertAndSend(this.rabbitSettings.getExchange(),
+        //         String.format("%s.%s", this.rabbitSettings.getContractEventsRoutingKey(), eventDetails.getFilterId()),
+        //         message);
+        
+        // rabbitTemplate.convertAndSend("",
+        //         String.format("%s.%s", eventDetails.getRouterKey(), eventDetails.getQueueName()),
+        //         message);
+
+        rabbitTemplate.convertAndSend(eventDetails.getRouterKey(),
+                String.format("%s", eventDetails.getQueueName()),
                 message);
 
         LOG.info(String.format("New contract event sent: [%s] to exchange [%s] with routing key [%s.%s]",
                 JSON.stringify(message),
                 this.rabbitSettings.getExchange(),
-                this.rabbitSettings.getContractEventsRoutingKey(),
-                eventDetails.getFilterId()));
+                eventDetails.getRouterKey(),
+                eventDetails.getQueueName()));
     }
 
     @Override
     public void broadcastTransaction(TransactionDetails transactionDetails) {
-        final EventeumMessage<TransactionDetails> message = createTransactionEventMessage(transactionDetails);
-        rabbitTemplate.convertAndSend(this.rabbitSettings.getExchange(),
-                String.format("%s.%s", this.rabbitSettings.getTransactionEventsRoutingKey(), transactionDetails.getHash()),
-                message);
+        // final EventeumMessage<TransactionDetails> message = createTransactionEventMessage(transactionDetails);
+        // rabbitTemplate.convertAndSend(this.rabbitSettings.getExchange(),
+        //         String.format("%s.%s", this.rabbitSettings.getTransactionEventsRoutingKey(), transactionDetails.getHash()),
+        //         message);
 
-        LOG.info(String.format("New transaction event sent: [%s] to exchange [%s] with routing key [%s.%s]",
-                JSON.stringify(message),
-                this.rabbitSettings.getExchange(),
-                this.rabbitSettings.getTransactionEventsRoutingKey(),
-                transactionDetails.getHash()
-                )
-        );
+        // LOG.info(String.format("New transaction event sent: [%s] to exchange [%s] with routing key [%s.%s]",
+        //         JSON.stringify(message),
+        //         this.rabbitSettings.getExchange(),
+        //         this.rabbitSettings.getTransactionEventsRoutingKey(),
+        //         transactionDetails.getHash()
+        //         )
+        // );
     }
 
     protected EventeumMessage<BlockDetails> createBlockEventMessage(BlockDetails blockDetails) {
