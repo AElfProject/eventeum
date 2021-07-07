@@ -86,6 +86,8 @@ public class ContractEventDetails implements TransactionBasedDetails {
 
     private String routerKey;
 
+    private String exchange;
+
     @Lob
     @ElementCollection
     private List<String> topics;

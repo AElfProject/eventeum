@@ -30,29 +30,46 @@ ethereum:
   numBlocksToReplay: 12
   sync:
     batchSize: 100000
-  initialStartBlock: 25817035
+  initialStartBlock: 25964100
 
 eventFilters:
-  - id: ValueSetOnTest
+  # - id: ValueSetOnTest
+  #   node: default
+  #   contractAddress: "0x740C31bbd233381cd5FF42621386C9A761D23880"
+  #   eventSpecification:
+  #     eventName: ValueSet
+  #     IndexedParameterDefinitions:
+  #       - position: 0
+  #         type: UINT256
+  #       - position: 1
+  #         type: INT256
+  #     NonIndexedParameterDefinitions:
+  #       - position: 2
+  #         type: STRING
+  #       - position: 3
+  #         type: BYTES4
+  #   startBlock: 25817035
+  #   queueName: "Serial-Test"
+  #   routerKey: "ValueSet-Serial"
+  - id: ERC20
     node: default
-    contractAddress: "0x740C31bbd233381cd5FF42621386C9A761D23880"
+    contractAddress: "0xB5685232b185cAdF7C5F58217722Ac40BC4ec45e"
     eventSpecification:
-      eventName: ValueSet
+      eventName: Transfer
       IndexedParameterDefinitions:
         - position: 0
-          type: UINT256
+          type: ADDRESS
         - position: 1
-          type: INT256
+          type: ADDRESS
       NonIndexedParameterDefinitions:
         - position: 2
-          type: STRING
-        - position: 3
-          type: BYTES4
-    startBlock: 25817035
-    queueName: "Serial-Test"
-    routerKey: "ValueSet-Serial"
-    # queueName: "ValueSetTestQueue"
-    # routerKey: ""
+          type: UINT256
+#        - position: 3
+#          type: BYTES4
+    startBlock: 25941300
+    queueName: ""
+    routerKey: "EventeumMessage"
+    exchange: "EventHandler-Kovan"
 
 #transactionFilters:
 #- nodeName: ${ETHEREUM_NETWORK:default}

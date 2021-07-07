@@ -58,4 +58,6 @@ public class ContractEventFilter {
     private String queueName;
 
     private String routerKey;
+
+    private String exchange;
 }
