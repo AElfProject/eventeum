@@ -67,20 +67,16 @@ public class RabbitBlockChainEventBroadcaster implements BlockchainEventBroadcas
     @Override
     public void broadcastContractEvent(ContractEventDetails eventDetails) {
         final EventeumMessage<ContractEventDetails> message = createContractEventMessage(eventDetails);
-        // rabbitTemplate.convertAndSend(this.rabbitSettings.getExchange(),
-        //         String.format("%s.%s", this.rabbitSettings.getContractEventsRoutingKey(), eventDetails.getFilterId()),
-        //         message);
-        
-        // rabbitTemplate.convertAndSend("",
-        //         String.format("%s.%s", eventDetails.getRouterKey(), eventDetails.getQueueName()),
-        //         message);
-
         if(eventDetails.getExchange() == ""){
+            if(eventDetails.getQueueName() == "")
+                return;
             rabbitTemplate.convertAndSend("",
                 String.format("%s", eventDetails.getQueueName()),
                 message);
         }
         else{
+            if(eventDetails.getRouterKey() == "")
+                return;
             rabbitTemplate.convertAndSend(eventDetails.getExchange(),
                 String.format("%s", eventDetails.getRouterKey()),
                 message);
