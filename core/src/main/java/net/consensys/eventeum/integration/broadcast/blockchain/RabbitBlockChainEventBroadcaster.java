@@ -67,20 +67,14 @@ public class RabbitBlockChainEventBroadcaster implements BlockchainEventBroadcas
     @Override
     public void broadcastContractEvent(ContractEventDetails eventDetails) {
         final EventeumMessage<ContractEventDetails> message = createContractEventMessage(eventDetails);
+        String routerName;
         if(eventDetails.getExchange() == ""){
-            if(eventDetails.getQueueName() == "")
-                return;
-            rabbitTemplate.convertAndSend("",
-                String.format("%s", eventDetails.getQueueName()),
-                message);
+            routerName = eventDetails.getQueueName();
         }
         else{
-            if(eventDetails.getRouterKey() == "")
-                return;
-            rabbitTemplate.convertAndSend(eventDetails.getExchange(),
-                String.format("%s", eventDetails.getRouterKey()),
-                message);
+            routerName = eventDetails.getRouterKey();
         }
+        rabbitTemplate.convertAndSend(eventDetails.getExchange(), routerName, message);
         LOG.info(String.format("New contract event sent: [%s] to exchange [%s] with routing key [%s.%s]",
                 JSON.stringify(message),
                 eventDetails.getExchange(),
