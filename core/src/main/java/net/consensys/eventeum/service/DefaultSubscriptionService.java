@@ -174,6 +174,9 @@ public class DefaultSubscriptionService implements SubscriptionService {
                 filterSubscriptions.put(filter.getId(), filter);
 
                 //TODO start block replay
+                if(filter.getStartBlock() != null){
+                    eventSyncService.dynamicSync(filter);
+                }
 
                 saveContractEventFilter(filter);
 

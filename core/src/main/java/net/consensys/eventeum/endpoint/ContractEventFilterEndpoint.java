@@ -48,9 +48,9 @@ public class ContractEventFilterEndpoint {
     public AddEventFilterResponse addEventFilter(@RequestBody ContractEventFilter eventFilter,
                                                  HttpServletResponse response) {
 
-        if (eventFilter.getStartBlock() != null) {
-            throw new BadRequestException("Filters registered via REST do not support the startBlock attribute");
-        }
+        // if (eventFilter.getStartBlock() != null) {
+        //     throw new BadRequestException("Filters registered via REST do not support the startBlock attribute");
+        // }
 
         final ContractEventFilter registeredFilter = filterService.registerContractEventFilter(eventFilter, true);
         response.setStatus(HttpServletResponse.SC_ACCEPTED);

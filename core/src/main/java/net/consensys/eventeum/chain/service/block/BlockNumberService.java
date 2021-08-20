@@ -16,7 +16,11 @@ package net.consensys.eventeum.chain.service.block;
 
 import java.math.BigInteger;
 
+import avro.shaded.com.google.common.base.Optional;
+import net.consensys.eventeum.model.LatestBlock;
+
 public interface BlockNumberService {
 
     BigInteger getStartBlockForNode(String nodeName);
+    BigInteger getTheLatestBlock(String nodeName);
 }

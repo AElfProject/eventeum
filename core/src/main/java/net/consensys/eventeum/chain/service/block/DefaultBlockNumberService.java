@@ -85,6 +85,16 @@ public class DefaultBlockNumberService implements BlockNumberService {
         return startBlock;
     }
 
+    @Override
+    public BigInteger getTheLatestBlock(String nodeName) {
+        final Optional<LatestBlock> latestBlock = getLatestBlock(nodeName);
+
+        if (latestBlock.isPresent()) {
+            return latestBlock.get().getNumber();
+        }
+        return BigInteger.ZERO;
+    }
+
     protected Optional<LatestBlock> getLatestBlock(String nodeName) {
         return eventStoreService.getLatestBlock(nodeName);
     }

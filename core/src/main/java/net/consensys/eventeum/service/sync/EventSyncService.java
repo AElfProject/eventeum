@@ -22,4 +22,6 @@ public interface EventSyncService {
 
     void sync(List<ContractEventFilter> filters);
 
+    void dynamicSync(ContractEventFilter filter);
+
 }
