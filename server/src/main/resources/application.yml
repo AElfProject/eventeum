@@ -19,7 +19,8 @@ ethereum:
   nodes:
   - name: default
 #    url: ${ETHEREUM_NODE_URL:wss://mainnet.infura.io/ws/v3/6d00f1fc08d84be7a25d76996d16550b}
-    url: ${ETHEREUM_NODE_URL:https://kovan.infura.io/v3/4c41b8476e874c178c633ff442a27a1b}
+    #url: ${ETHEREUM_NODE_URL:https://kovan.infura.io/v3/4c41b8476e874c178c633ff442a27a1b}
+    url: ${ETHEREUM_NODE_URL:http://192.168.67.6:8545}
     blockStrategy: POLL
     syncingThreshold: 100
     healthcheckInterval: 5000
@@ -30,7 +31,7 @@ ethereum:
   numBlocksToReplay: 12
   sync:
     batchSize: 100000
-  initialStartBlock: 25964100
+  initialStartBlock: 9876830
 
 eventFilters:
   # - id: ValueSetOnTest
@@ -51,11 +52,11 @@ eventFilters:
   #   startBlock: 25817035
   #   queueName: "Serial-Test"
   #   routerKey: "ValueSet-Serial"
-  - id: ERC20
+  - id: id1
     node: default
-    contractAddress: "0xB5685232b185cAdF7C5F58217722Ac40BC4ec45e"
+    contractAddress: "0xBCfCcbde45cE874adCB698cC183deBcF17952812"
     eventSpecification:
-      eventName: Transfer
+      eventName: PairCreated
       IndexedParameterDefinitions:
         - position: 0
           type: ADDRESS
@@ -63,13 +64,13 @@ eventFilters:
           type: ADDRESS
       NonIndexedParameterDefinitions:
         - position: 2
+          type: ADDRESS
+        - position: 3
           type: UINT256
-#        - position: 3
-#          type: BYTES4
-    startBlock: 25941300
-    queueName: ""
-    routerKey: "EventeumMessage"
-    exchange: "EventHandler-Kovan"
+    #startBlock: 4100
+    queueName: "bscQueue"
+    routerKey: ""
+    exchange: ""
 
 #transactionFilters:
 #- nodeName: ${ETHEREUM_NETWORK:default}
