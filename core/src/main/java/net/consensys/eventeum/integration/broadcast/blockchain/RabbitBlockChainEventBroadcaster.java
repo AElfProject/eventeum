@@ -68,7 +68,7 @@ public class RabbitBlockChainEventBroadcaster implements BlockchainEventBroadcas
     public void broadcastContractEvent(ContractEventDetails eventDetails) {
         final EventeumMessage<ContractEventDetails> message = createContractEventMessage(eventDetails);
         String routerName;
-        if(eventDetails.getExchange() == ""){
+        if(eventDetails.getExchange() == null || eventDetails.getExchange().isEmpty()){
             routerName = eventDetails.getQueueName();
         }
         else{

@@ -31,7 +31,7 @@ ethereum:
   numBlocksToReplay: 12
   sync:
     batchSize: 100000
-  initialStartBlock: 9876830
+  initialStartBlock: 6123693
 
 eventFilters:
   # - id: ValueSetOnTest
@@ -52,7 +52,7 @@ eventFilters:
   #   startBlock: 25817035
   #   queueName: "Serial-Test"
   #   routerKey: "ValueSet-Serial"
-  - id: id1
+  - id: PairCreated
     node: default
     contractAddress: "0xBCfCcbde45cE874adCB698cC183deBcF17952812"
     eventSpecification:

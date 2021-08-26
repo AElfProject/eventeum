@@ -48,10 +48,10 @@ public class EventProcessingBlockListener implements BlockListener {
 
     @Override
     public void onBlock(Block block) {
-        List<ContractEventFilter> filters = subscriptionService.listContractEventFilters();
-        filters.forEach(filter -> {
-            log.info("=== web3 block event filter with id {} address {} from block {}", filter.getId(), filter.getContractAddress(), block.getNumber());
-        });
+        // List<ContractEventFilter> filters = subscriptionService.listContractEventFilters();
+        // filters.forEach(filter -> {
+        //     log.info("=== web3 block event filter with id {} address {} from block {}", filter.getId(), filter.getContractAddress(), block.getNumber());
+        // });
         contractEventProcessor.processLogsInBlock(block, subscriptionService.listContractEventFilters());
     }
 }

@@ -84,15 +84,16 @@ public class DefaultEventSyncService implements EventSyncService {
         asyncService.execute(ExecutorNameFactory.build(BLOCK_EXECUTOR_NAME, filter.getNode()), () -> {            
             final BigInteger latestBlockNumber = blockNumberService.getTheLatestBlock(filter.getNode());
             if (latestBlockNumber.equals(BigInteger.ZERO)) {
-                log.info("===Syncing latest block number is 0");
+                log.info("Syncing latest block number is 0");
                 return;
             }
             final BigInteger startBlock = filter.getStartBlock();
-            log.info("===Syncing event filter with id {} from block {} to {}", filter.getId(), startBlock, latestBlockNumber);
+            log.info("Syncing event filter with id {} from block {} to {}", filter.getId(), startBlock, latestBlockNumber);
             final EventFilterSyncStatus finalSyncStatus = getEventSyncStatus(filter.getId());
             if (startBlock.compareTo(latestBlockNumber) > 0) {
                 finalSyncStatus.setSyncStatus(SyncStatus.SYNCED);
-                log.info("===Syncing latest block is less than start block");
+                syncStatusRepository.save(finalSyncStatus);
+                log.info("Syncing latest block is less than start block");
                 return;
             }
             eventRetriever.retrieveEvents(filter, startBlock, latestBlockNumber,
