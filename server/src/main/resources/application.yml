@@ -31,7 +31,7 @@ ethereum:
   numBlocksToReplay: 12
   sync:
     batchSize: 100000
-  initialStartBlock: 6123693
+  initialStartBlock: 586851
 
 eventFilters:
   # - id: ValueSetOnTest
