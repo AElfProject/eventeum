@@ -23,7 +23,10 @@ import java.util.function.Consumer;
 
 public interface EventRetriever {
 
-    void retrieveEvents(ContractEventFilter eventFilter,
+    void retrieveEvents(ContractEventFilter eventFilter, BigInteger startBlock, BigInteger endBlock,
+            Consumer<List<ContractEventDetails>> eventConsumer);
+
+    public void retrieveEventsWithBlockTimestamp(ContractEventFilter eventFilter,
                         BigInteger startBlock,
                         BigInteger endBlock,
                         Consumer<List<ContractEventDetails>> eventConsumer);

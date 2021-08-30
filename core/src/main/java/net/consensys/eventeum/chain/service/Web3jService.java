@@ -99,6 +99,39 @@ public class Web3jService implements BlockchainService {
         }
     }
 
+    @Override
+    public List<ContractEventDetails> retrieveEventsWithBlockTimestamp(ContractEventFilter eventFilter,
+                                                     BigInteger startBlock,
+                                                     BigInteger endBlock) {
+        final ContractEventSpecification eventSpec = eventFilter.getEventSpecification();
+        final EthFilter ethFilter = new EthFilter(new DefaultBlockParameterNumber(startBlock),
+                new DefaultBlockParameterNumber(endBlock), eventFilter.getContractAddress());
+                                                    
+
+        if (eventFilter.getEventSpecification() != null) {
+            ethFilter.addSingleTopic(Web3jUtil.getSignature(eventSpec));
+        }
+
+        try {
+            final EthLog logs = web3j.ethGetLogs(ethFilter).send();
+            List<ContractEventDetails> eventDetails = logs.getLogs()
+            .stream()
+            .map(logResult -> eventDetailsFactory.createEventDetails(eventFilter, (Log) logResult.get()))
+            .collect(Collectors.toList());
+            EthBlock ethBlock = null;
+            for (ContractEventDetails eventDetail : eventDetails) {
+                BigInteger eventBlockNumber = eventDetail.getBlockNumber();
+                if(ethBlock == null || ethBlock.getBlock().getNumber().compareTo(eventBlockNumber) != 0){
+                    ethBlock = web3j.ethGetBlockByNumber(new DefaultBlockParameterNumber(eventBlockNumber), true).send();
+                }
+                eventDetail.setTimestamp(ethBlock.getBlock().getTimestamp());
+            }
+            return eventDetails;
+        } catch (IOException e) {
+            throw new BlockchainException("Error obtaining logs", e);
+        }
+    }
+
     /**
      * {inheritDoc}
      */

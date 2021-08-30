@@ -96,7 +96,7 @@ public class DefaultEventSyncService implements EventSyncService {
                 log.info("Syncing latest block is less than start block");
                 return;
             }
-            eventRetriever.retrieveEvents(filter, startBlock, latestBlockNumber,
+            eventRetriever.retrieveEventsWithBlockTimestamp(filter, startBlock, latestBlockNumber,
                     (events) -> events.forEach(this::processEvent));
             finalSyncStatus.setSyncStatus(SyncStatus.SYNCED);
             syncStatusRepository.save(finalSyncStatus);

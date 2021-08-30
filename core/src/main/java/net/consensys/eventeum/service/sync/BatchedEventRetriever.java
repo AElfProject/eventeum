@@ -61,4 +61,32 @@ public class BatchedEventRetriever implements EventRetriever {
             batchStartBlock = batchEndBlock.add(BigInteger.ONE);
         }
     }
+
+    @Override
+    public void retrieveEventsWithBlockTimestamp(ContractEventFilter eventFilter,
+                               BigInteger startBlock,
+                               BigInteger endBlock,
+                               Consumer<List<ContractEventDetails>> eventConsumer) {
+
+        BigInteger batchStartBlock = startBlock;
+
+        while (batchStartBlock.compareTo(endBlock) < 0) {
+            BigInteger batchEndBlock;
+
+            if (batchStartBlock.add(settings.getSyncBatchSize()).compareTo(endBlock) >= 0) {
+                batchEndBlock = endBlock;
+            } else {
+                batchEndBlock = batchStartBlock.add(settings.getSyncBatchSize());
+            }
+
+            final List<ContractEventDetails> events = servicesContainer
+                    .getNodeServices(eventFilter.getNode())
+                    .getBlockchainService()
+                    .retrieveEventsWithBlockTimestamp(eventFilter, batchStartBlock, batchEndBlock);
+            eventConsumer.accept(events);
+
+            batchStartBlock = batchEndBlock.add(BigInteger.ONE);
+        }
+    }
+
 }
