@@ -105,20 +105,19 @@ public class Web3jService implements BlockchainService {
     public List<ContractEventDetails> retrieveEventsWithBlockTimestamp(List<ContractEventFilter> eventFilters,
                                                      BigInteger startBlock,
                                                      BigInteger endBlock) {
+        List<String> contractAddressList = new ArrayList<String>(eventFilters
+        .stream()
+        .collect(Collectors.groupingBy(x -> x.getContractAddress()))
+        .keySet());
         final EthFilter ethFilter = new EthFilter(new DefaultBlockParameterNumber(startBlock),
-            new DefaultBlockParameterNumber(endBlock), new ArrayList<String>());
-        for (ContractEventFilter eventFilter : eventFilters) {
-            ethFilter.getAddress().add(eventFilter.getContractAddress());
-            final ContractEventSpecification eventSpec = eventFilter.getEventSpecification();
-            if (eventFilter.getEventSpecification() != null) {
-                ethFilter.addSingleTopic(Web3jUtil.getSignature(eventSpec));
-            }
-        }
+            new DefaultBlockParameterNumber(endBlock), contractAddressList);
         try {
             final EthLog logs = web3j.ethGetLogs(ethFilter).send();
             List<ContractEventDetails> eventDetails = logs.getLogs()
             .stream()
             .map(logResult -> eventDetailsFactory.createEventDetailsByEventFilter(eventFilters, (Log) logResult.get()))
+            .filter(e -> e != null)
+            .sorted((x, y) -> x.getBlockNumber().compareTo(y.getBlockNumber()))
             .collect(Collectors.toList());
             EthBlock ethBlock = null;
             for (ContractEventDetails eventDetail : eventDetails) {

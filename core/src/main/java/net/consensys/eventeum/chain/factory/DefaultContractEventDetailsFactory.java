@@ -37,6 +37,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import lombok.extern.slf4j.Slf4j;
+import lombok.AllArgsConstructor;
+
+@Slf4j
 public class DefaultContractEventDetailsFactory implements ContractEventDetailsFactory {
 
     private EventParameterConverter<Type> parameterConverter;
@@ -165,10 +169,25 @@ public class DefaultContractEventDetailsFactory implements ContractEventDetailsF
         return toCheck == null || toCheck.isEmpty();
     }
 
-    private boolean isContractFilterMachLog(ContractEventFilter eventFilter, Log log){
-        List<String> topics = log.getTopics();
+    private boolean isContractFilterMachLog(ContractEventFilter eventFilter, Log ethLog){
+
+        // log.info("******  start compare:");
+
+        List<String> topics = ethLog.getTopics();
         ContractEventSpecification eventSpec = eventFilter.getEventSpecification();
+        String logContractAddress = Keys.toChecksumAddress(ethLog.getAddress());
+        String filterContractAddress = Keys.toChecksumAddress(eventFilter.getContractAddress());
         String eventTopic = Web3jUtil.getSignature(eventSpec);
-        return topics.get(0) == eventTopic;
+
+        // log.info("filter contract address: {}", filterContractAddress);
+        // log.info("filter topic: {}", eventTopic);
+        // log.info("log contract address: {}", logContractAddress);
+        // log.info("log topic: {}", topics.get(0));
+        
+        // if(topics.get(0).compareTo(eventTopic) == 0){
+        //     log.info("match success");
+        // }
+        // log.info("******  end compare:");
+        return logContractAddress.compareTo(filterContractAddress) == 0 && topics.get(0).compareTo(eventTopic) == 0;
     }
 }

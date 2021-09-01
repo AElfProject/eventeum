@@ -91,11 +91,11 @@ public class DefaultEventSyncService implements EventSyncService {
         asyncService.execute(ExecutorNameFactory.build(BLOCK_EXECUTOR_NAME, nodeName), () -> {            
             final BigInteger latestBlockNumber = blockNumberService.getTheLatestBlock(nodeName);
             if (latestBlockNumber.equals(BigInteger.ZERO)) {
-                log.info("Syncing latest block number is 0");
+                log.info("====== Syncing latest block number is 0");
                 return;
             }
             final BigInteger startBlock = filterList.getStartBlock();
-            log.info("Syncing event filters from block {} to {}", startBlock, latestBlockNumber);
+            log.info("====== Syncing event filters from block {} to {}", startBlock, latestBlockNumber);
 
             if (startBlock.compareTo(latestBlockNumber) > 0) {
                 for (ContractEventFilter filter : filters) {
@@ -103,7 +103,7 @@ public class DefaultEventSyncService implements EventSyncService {
                     finalSyncStatus.setSyncStatus(SyncStatus.SYNCED);
                     syncStatusRepository.save(finalSyncStatus);
                 }
-                log.info("Syncing latest block is less than start block");
+                log.info("======= Syncing latest block is less than start block");
                 return;
             }
 
