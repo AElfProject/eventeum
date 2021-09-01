@@ -16,6 +16,7 @@ package net.consensys.eventeum.service.sync;
 
 import net.consensys.eventeum.dto.event.ContractEventDetails;
 import net.consensys.eventeum.dto.event.filter.ContractEventFilter;
+import net.consensys.eventeum.dto.event.filter.ContractEventFilterList;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -26,7 +27,7 @@ public interface EventRetriever {
     void retrieveEvents(ContractEventFilter eventFilter, BigInteger startBlock, BigInteger endBlock,
             Consumer<List<ContractEventDetails>> eventConsumer);
 
-    public void retrieveEventsWithBlockTimestamp(ContractEventFilter eventFilter,
+    public void retrieveEventsWithBlockTimestamp(ContractEventFilterList eventFilter,
                         BigInteger startBlock,
                         BigInteger endBlock,
                         Consumer<List<ContractEventDetails>> eventConsumer);

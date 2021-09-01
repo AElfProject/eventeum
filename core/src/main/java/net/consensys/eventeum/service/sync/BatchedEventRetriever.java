@@ -18,6 +18,8 @@ import lombok.AllArgsConstructor;
 import net.consensys.eventeum.chain.service.container.ChainServicesContainer;
 import net.consensys.eventeum.dto.event.ContractEventDetails;
 import net.consensys.eventeum.dto.event.filter.ContractEventFilter;
+import net.consensys.eventeum.dto.event.filter.ContractEventFilterList;
+
 import net.consensys.eventeum.settings.EventeumSettings;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +65,7 @@ public class BatchedEventRetriever implements EventRetriever {
     }
 
     @Override
-    public void retrieveEventsWithBlockTimestamp(ContractEventFilter eventFilter,
+    public void retrieveEventsWithBlockTimestamp(ContractEventFilterList eventFilterList,
                                BigInteger startBlock,
                                BigInteger endBlock,
                                Consumer<List<ContractEventDetails>> eventConsumer) {
@@ -79,10 +81,12 @@ public class BatchedEventRetriever implements EventRetriever {
                 batchEndBlock = batchStartBlock.add(settings.getSyncBatchSize());
             }
 
+            List<ContractEventFilter> filters = eventFilterList.getFilters();
+            ContractEventFilter firstFilter = filters.get(0);
             final List<ContractEventDetails> events = servicesContainer
-                    .getNodeServices(eventFilter.getNode())
+                    .getNodeServices(firstFilter.getNode())
                     .getBlockchainService()
-                    .retrieveEventsWithBlockTimestamp(eventFilter, batchStartBlock, batchEndBlock);
+                    .retrieveEventsWithBlockTimestamp(filters, batchStartBlock, batchEndBlock);
             eventConsumer.accept(events);
 
             batchStartBlock = batchEndBlock.add(BigInteger.ONE);

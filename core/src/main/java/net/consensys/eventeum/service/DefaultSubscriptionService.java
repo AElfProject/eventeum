@@ -20,6 +20,7 @@ import net.consensys.eventeum.chain.service.BlockchainService;
 import net.consensys.eventeum.chain.service.container.ChainServicesContainer;
 import net.consensys.eventeum.chain.service.strategy.BlockSubscriptionStrategy;
 import net.consensys.eventeum.dto.event.filter.ContractEventFilter;
+import net.consensys.eventeum.dto.event.filter.ContractEventFilterList;
 import net.consensys.eventeum.integration.broadcast.internal.EventeumEventBroadcaster;
 import net.consensys.eventeum.repository.ContractEventFilterRepository;
 import net.consensys.eventeum.service.exception.NotFoundException;
@@ -60,11 +61,9 @@ public class DefaultSubscriptionService implements SubscriptionService {
 
     @Autowired
     public DefaultSubscriptionService(ChainServicesContainer chainServices,
-                                      ContractEventFilterRepository eventFilterRepository,
-                                      EventeumEventBroadcaster eventeumEventBroadcaster,
-                                      List<BlockListener> blockListeners,
-                                      @Qualifier("eternalRetryTemplate") RetryTemplate retryTemplate,
-                                      EventSyncService eventSyncService) {
+            ContractEventFilterRepository eventFilterRepository, EventeumEventBroadcaster eventeumEventBroadcaster,
+            List<BlockListener> blockListeners, @Qualifier("eternalRetryTemplate") RetryTemplate retryTemplate,
+            EventSyncService eventSyncService) {
         this.chainServices = chainServices;
         this.eventFilterRepository = eventFilterRepository;
         this.eventeumEventBroadcaster = eventeumEventBroadcaster;
@@ -75,14 +74,11 @@ public class DefaultSubscriptionService implements SubscriptionService {
         filterSubscriptions = new HashMap<>();
     }
 
-
     public void init(List<ContractEventFilter> initFilters) {
 
         if (initFilters != null && !initFilters.isEmpty()) {
-            final List<ContractEventFilter> filtersWithStartBlock = initFilters
-                    .stream()
-                    .filter(filter -> filter.getStartBlock() != null)
-                    .collect(Collectors.toList());
+            final List<ContractEventFilter> filtersWithStartBlock = initFilters.stream()
+                    .filter(filter -> filter.getStartBlock() != null).collect(Collectors.toList());
 
             if (!filtersWithStartBlock.isEmpty()) {
                 state = SubscriptionServiceState.SYNCING_EVENTS;
@@ -108,6 +104,15 @@ public class DefaultSubscriptionService implements SubscriptionService {
      * {@inheritDoc}
      */
     @Override
+    public List<ContractEventFilter> registerContractEventFilters(ContractEventFilterList filterList,
+            boolean broadcast) {
+        return doRegisterContractEventFilters(filterList, broadcast);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @Async
     public ContractEventFilter registerContractEventFilterWithRetries(ContractEventFilter filter, boolean broadcast) {
         return retryTemplate.execute((context) -> doRegisterContractEventFilter(filter, broadcast));
@@ -118,7 +123,7 @@ public class DefaultSubscriptionService implements SubscriptionService {
      */
     @Override
     public List<ContractEventFilter> listContractEventFilters() {
-      return new ArrayList<>(filterSubscriptions.values());
+        return new ArrayList<>(filterSubscriptions.values());
     }
 
     /**
@@ -153,9 +158,7 @@ public class DefaultSubscriptionService implements SubscriptionService {
      */
     @Override
     public void unsubscribeToAllSubscriptions(String nodeName) {
-        filterSubscriptions
-                .entrySet()
-                .removeIf(entry -> entry.getValue().getNode().equals(nodeName));
+        filterSubscriptions.entrySet().removeIf(entry -> entry.getValue().getNode().equals(nodeName));
     }
 
     /**
@@ -173,11 +176,7 @@ public class DefaultSubscriptionService implements SubscriptionService {
             if (!isFilterRegistered(filter)) {
                 filterSubscriptions.put(filter.getId(), filter);
 
-                //TODO start block replay
-                if(filter.getStartBlock() != null){
-                    eventSyncService.dynamicSync(filter);
-                }
-
+                // TODO start block replay
                 saveContractEventFilter(filter);
 
                 if (broadcast) {
@@ -195,8 +194,45 @@ public class DefaultSubscriptionService implements SubscriptionService {
         }
     }
 
-    private void subscribeToNewBlockEvents(
-            BlockSubscriptionStrategy subscriptionStrategy, List<BlockListener> blockListeners) {
+    private List<ContractEventFilter> doRegisterContractEventFilters(ContractEventFilterList filterList,
+            boolean broadcast) {
+        List<ContractEventFilter> unRegisterredFilters = new ArrayList<ContractEventFilter>();
+        for (ContractEventFilter filter : filterList.getFilters()) {
+            populateIdIfMissing(filter);
+            if (isFilterRegistered(filter)) {
+                log.info("Already registered contract event filter with id: " + filter.getId());
+                continue;
+            }
+            unRegisterredFilters.add(filter);
+        }
+        if (unRegisterredFilters.size() == 0) {
+            return unRegisterredFilters;
+        }
+
+        Map<String, Boolean> map = new HashMap<>();
+        for (ContractEventFilter filter : unRegisterredFilters) {
+            String filterId = filter.getId();
+            if (map.get(filterId) != null && map.get(filterId)) {
+                log.error("repeat filters register");
+                return new ArrayList<ContractEventFilter>();
+            }
+            map.put(filterId, true);
+        }
+        for (ContractEventFilter filter : unRegisterredFilters) {
+            filterSubscriptions.put(filter.getId(), filter);
+            saveContractEventFilter(filter);
+            if (broadcast) {
+                broadcastContractEventFilterAdded(filter);
+            }
+        }
+        if(filterList.getStartBlock() != null){
+            eventSyncService.dynamicSync(filterList);
+        }
+        return unRegisterredFilters;
+    }
+
+    private void subscribeToNewBlockEvents(BlockSubscriptionStrategy subscriptionStrategy,
+            List<BlockListener> blockListeners) {
         blockListeners.forEach(listener -> subscriptionStrategy.addBlockListener(listener));
 
         subscriptionStrategy.subscribe();

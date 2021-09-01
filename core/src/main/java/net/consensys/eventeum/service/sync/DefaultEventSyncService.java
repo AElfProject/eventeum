@@ -19,6 +19,7 @@ import net.consensys.eventeum.chain.contract.ContractEventProcessor;
 import net.consensys.eventeum.chain.service.block.BlockNumberService;
 import net.consensys.eventeum.dto.event.ContractEventDetails;
 import net.consensys.eventeum.dto.event.filter.ContractEventFilter;
+import net.consensys.eventeum.dto.event.filter.ContractEventFilterList;
 import net.consensys.eventeum.model.EventFilterSyncStatus;
 import net.consensys.eventeum.model.LatestBlock;
 import net.consensys.eventeum.model.SyncStatus;
@@ -73,34 +74,47 @@ public class DefaultEventSyncService implements EventSyncService {
     }
 
     @Override
-    public void dynamicSync(ContractEventFilter filter) {
+    public void dynamicSync(ContractEventFilterList filter) {
         retryTemplate.execute((context) -> {
             dynamicSyncFilter(filter);
             return null;
         });
     }
 
-    private void dynamicSyncFilter(ContractEventFilter filter) {
-        asyncService.execute(ExecutorNameFactory.build(BLOCK_EXECUTOR_NAME, filter.getNode()), () -> {            
-            final BigInteger latestBlockNumber = blockNumberService.getTheLatestBlock(filter.getNode());
+    private void dynamicSyncFilter(ContractEventFilterList filterList) {
+        List<ContractEventFilter> filters = filterList.getFilters();
+        if(filters.size() == 0){
+            return;
+        }
+        ContractEventFilter firstFilter = filters.get(0);
+        String nodeName = firstFilter.getNode();
+        asyncService.execute(ExecutorNameFactory.build(BLOCK_EXECUTOR_NAME, nodeName), () -> {            
+            final BigInteger latestBlockNumber = blockNumberService.getTheLatestBlock(nodeName);
             if (latestBlockNumber.equals(BigInteger.ZERO)) {
                 log.info("Syncing latest block number is 0");
                 return;
             }
-            final BigInteger startBlock = filter.getStartBlock();
-            log.info("Syncing event filter with id {} from block {} to {}", filter.getId(), startBlock, latestBlockNumber);
-            final EventFilterSyncStatus finalSyncStatus = getEventSyncStatus(filter.getId());
+            final BigInteger startBlock = filterList.getStartBlock();
+            log.info("Syncing event filters from block {} to {}", startBlock, latestBlockNumber);
+
             if (startBlock.compareTo(latestBlockNumber) > 0) {
-                finalSyncStatus.setSyncStatus(SyncStatus.SYNCED);
-                syncStatusRepository.save(finalSyncStatus);
+                for (ContractEventFilter filter : filters) {
+                    EventFilterSyncStatus finalSyncStatus = getEventSyncStatus(filter.getId());
+                    finalSyncStatus.setSyncStatus(SyncStatus.SYNCED);
+                    syncStatusRepository.save(finalSyncStatus);
+                }
                 log.info("Syncing latest block is less than start block");
                 return;
             }
-            eventRetriever.retrieveEventsWithBlockTimestamp(filter, startBlock, latestBlockNumber,
-                    (events) -> events.forEach(this::processEvent));
-            finalSyncStatus.setSyncStatus(SyncStatus.SYNCED);
-            syncStatusRepository.save(finalSyncStatus);
-            log.info("Event filter with id {} has completed syncing", filter.getId());
+
+            eventRetriever.retrieveEventsWithBlockTimestamp(filterList, startBlock, latestBlockNumber,
+                    (events) -> events.forEach(this::processEvent));    
+            for (ContractEventFilter filter : filters) {
+                EventFilterSyncStatus finalSyncStatus = getEventSyncStatus(filter.getId());
+                finalSyncStatus.setSyncStatus(SyncStatus.SYNCED);
+                syncStatusRepository.save(finalSyncStatus);
+                log.info("Event filter with id {} has completed syncing", filter.getId());
+            }       
         });
     }
 

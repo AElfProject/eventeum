@@ -60,7 +60,7 @@ public interface BlockchainService {
      * @param endBlock The end block
      * @return The blockchain contract events
      */
-    List<ContractEventDetails> retrieveEventsWithBlockTimestamp(ContractEventFilter eventFilter,
+    List<ContractEventDetails> retrieveEventsWithBlockTimestamp(List<ContractEventFilter> eventFilter,
                                               BigInteger startBlock,
                                               BigInteger endBlock);
 

@@ -15,6 +15,7 @@
 package net.consensys.eventeum.service.sync;
 
 import net.consensys.eventeum.dto.event.filter.ContractEventFilter;
+import net.consensys.eventeum.dto.event.filter.ContractEventFilterList;
 
 import java.util.List;
 
@@ -22,6 +23,6 @@ public interface EventSyncService {
 
     void sync(List<ContractEventFilter> filters);
 
-    void dynamicSync(ContractEventFilter filter);
+    void dynamicSync(ContractEventFilterList filter);
 
 }

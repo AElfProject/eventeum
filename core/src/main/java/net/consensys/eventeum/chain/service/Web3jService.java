@@ -44,6 +44,8 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.ArrayList;
 
 /**
  * A BlockchainService implementating utilising the Web3j library.
@@ -100,23 +102,23 @@ public class Web3jService implements BlockchainService {
     }
 
     @Override
-    public List<ContractEventDetails> retrieveEventsWithBlockTimestamp(ContractEventFilter eventFilter,
+    public List<ContractEventDetails> retrieveEventsWithBlockTimestamp(List<ContractEventFilter> eventFilters,
                                                      BigInteger startBlock,
                                                      BigInteger endBlock) {
-        final ContractEventSpecification eventSpec = eventFilter.getEventSpecification();
         final EthFilter ethFilter = new EthFilter(new DefaultBlockParameterNumber(startBlock),
-                new DefaultBlockParameterNumber(endBlock), eventFilter.getContractAddress());
-                                                    
-
-        if (eventFilter.getEventSpecification() != null) {
-            ethFilter.addSingleTopic(Web3jUtil.getSignature(eventSpec));
+            new DefaultBlockParameterNumber(endBlock), new ArrayList<String>());
+        for (ContractEventFilter eventFilter : eventFilters) {
+            ethFilter.getAddress().add(eventFilter.getContractAddress());
+            final ContractEventSpecification eventSpec = eventFilter.getEventSpecification();
+            if (eventFilter.getEventSpecification() != null) {
+                ethFilter.addSingleTopic(Web3jUtil.getSignature(eventSpec));
+            }
         }
-
         try {
             final EthLog logs = web3j.ethGetLogs(ethFilter).send();
             List<ContractEventDetails> eventDetails = logs.getLogs()
             .stream()
-            .map(logResult -> eventDetailsFactory.createEventDetails(eventFilter, (Log) logResult.get()))
+            .map(logResult -> eventDetailsFactory.createEventDetailsByEventFilter(eventFilters, (Log) logResult.get()))
             .collect(Collectors.toList());
             EthBlock ethBlock = null;
             for (ContractEventDetails eventDetail : eventDetails) {

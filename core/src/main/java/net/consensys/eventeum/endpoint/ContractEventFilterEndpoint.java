@@ -16,6 +16,7 @@ package net.consensys.eventeum.endpoint;
 
 import lombok.AllArgsConstructor;
 import net.consensys.eventeum.dto.event.filter.ContractEventFilter;
+import net.consensys.eventeum.dto.event.filter.ContractEventFilterList;
 import net.consensys.eventeum.endpoint.exception.BadRequestException;
 import net.consensys.eventeum.endpoint.response.AddEventFilterResponse;
 import net.consensys.eventeum.service.exception.NotFoundException;
@@ -38,7 +39,7 @@ public class ContractEventFilterEndpoint {
 
     private SubscriptionService filterService;
 
-    /**
+        /**
      * Adds an event filter with the specification described in the ContractEventFilter.
      *
      * @param eventFilter the event filter to add
@@ -48,14 +49,32 @@ public class ContractEventFilterEndpoint {
     public AddEventFilterResponse addEventFilter(@RequestBody ContractEventFilter eventFilter,
                                                  HttpServletResponse response) {
 
-        // if (eventFilter.getStartBlock() != null) {
-        //     throw new BadRequestException("Filters registered via REST do not support the startBlock attribute");
-        // }
+        if (eventFilter.getStartBlock() != null) {
+            throw new BadRequestException("Filters registered via REST do not support the startBlock attribute");
+        }
 
         final ContractEventFilter registeredFilter = filterService.registerContractEventFilter(eventFilter, true);
         response.setStatus(HttpServletResponse.SC_ACCEPTED);
 
         return new AddEventFilterResponse(registeredFilter.getId());
+    }
+
+    /**
+     * Adds an event filter with the specification described in the ContractEventFilter.
+     *
+     * @param eventFilter the event filter to add
+     * @param response the http response
+     */
+    @RequestMapping(method = RequestMethod.POST)
+    public AddEventFilterResponse addBatchEventFilterDynamicly(@RequestBody ContractEventFilterList eventFilterList,
+                                                 HttpServletResponse response) {
+        final List<ContractEventFilter> registeredFilters = filterService.registerContractEventFilters(eventFilterList, true);
+        response.setStatus(HttpServletResponse.SC_ACCEPTED);
+        String successIds ="";
+        for (ContractEventFilter registeredFilter : registeredFilters) {
+            successIds = successIds + registeredFilter.getId() + ";";
+        }
+        return new AddEventFilterResponse(successIds);
     }
 
     /**
