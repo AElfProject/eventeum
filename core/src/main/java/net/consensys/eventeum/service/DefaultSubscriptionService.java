@@ -15,6 +15,7 @@
 package net.consensys.eventeum.service;
 
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.implementation.bytecode.Throw;
 import net.consensys.eventeum.chain.block.BlockListener;
 import net.consensys.eventeum.chain.service.BlockchainService;
 import net.consensys.eventeum.chain.service.container.ChainServicesContainer;
@@ -27,6 +28,7 @@ import net.consensys.eventeum.service.exception.NotFoundException;
 import net.consensys.eventeum.service.sync.EventSyncService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.mongodb.core.mapreduce.GroupBy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -205,19 +207,20 @@ public class DefaultSubscriptionService implements SubscriptionService {
             }
             unRegisterredFilters.add(filter);
         }
-        if (unRegisterredFilters.size() == 0) {
+        int filtersCount = unRegisterredFilters.size();
+        if ( filtersCount == 0) {
             return unRegisterredFilters;
         }
-
-        Map<String, Boolean> map = new HashMap<>();
-        for (ContractEventFilter filter : unRegisterredFilters) {
-            String filterId = filter.getId();
-            if (map.get(filterId) != null && map.get(filterId)) {
-                log.error("repeat filters register");
-                return new ArrayList<ContractEventFilter>();
-            }
-            map.put(filterId, true);
+        int groupCount = unRegisterredFilters
+        .stream()
+        .collect(Collectors.groupingBy(x -> x.getId()))
+        .values()
+        .size();
+        if(filtersCount != groupCount){
+            log.error("repeat filters register");
+            return new ArrayList<ContractEventFilter>();
         }
+        Map<String, Boolean> map = new HashMap<>();
         for (ContractEventFilter filter : unRegisterredFilters) {
             filterSubscriptions.put(filter.getId(), filter);
             saveContractEventFilter(filter);
