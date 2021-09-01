@@ -19,8 +19,8 @@ ethereum:
   nodes:
   - name: default
 #    url: ${ETHEREUM_NODE_URL:wss://mainnet.infura.io/ws/v3/6d00f1fc08d84be7a25d76996d16550b}
-    #url: ${ETHEREUM_NODE_URL:https://kovan.infura.io/v3/4c41b8476e874c178c633ff442a27a1b}
-    url: ${ETHEREUM_NODE_URL:http://192.168.67.6:8545}
+    url: ${ETHEREUM_NODE_URL:https://kovan.infura.io/v3/4c41b8476e874c178c633ff442a27a1b}
+    #url: ${ETHEREUM_NODE_URL:http://192.168.67.6:8545}
     blockStrategy: POLL
     syncingThreshold: 100
     healthcheckInterval: 5000
@@ -31,7 +31,7 @@ ethereum:
   numBlocksToReplay: 12
   sync:
     batchSize: 100000
-  initialStartBlock: 586851
+  initialStartBlock: 648115
 
 eventFilters:
   # - id: ValueSetOnTest

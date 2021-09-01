@@ -65,7 +65,7 @@ public class ContractEventFilterEndpoint {
      * @param eventFilter the event filter to add
      * @param response the http response
      */
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST, value = "batch")
     public AddEventFilterResponse addBatchEventFilterDynamicly(@RequestBody ContractEventFilterList eventFilterList,
                                                  HttpServletResponse response) {
         final List<ContractEventFilter> registeredFilters = filterService.registerContractEventFilters(eventFilterList, true);
