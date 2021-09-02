@@ -123,7 +123,7 @@ public class Web3jService implements BlockchainService {
             for (ContractEventDetails eventDetail : eventDetails) {
                 BigInteger eventBlockNumber = eventDetail.getBlockNumber();
                 if(ethBlock == null || ethBlock.getBlock().getNumber().compareTo(eventBlockNumber) != 0){
-                    ethBlock = web3j.ethGetBlockByNumber(new DefaultBlockParameterNumber(eventBlockNumber), true).send();
+                    ethBlock = web3j.ethGetBlockByNumber(new DefaultBlockParameterNumber(eventBlockNumber), false).send();
                 }
                 eventDetail.setTimestamp(ethBlock.getBlock().getTimestamp());
             }
