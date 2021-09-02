@@ -74,11 +74,16 @@ public class RabbitBlockChainEventBroadcaster implements BlockchainEventBroadcas
         else{
             routerName = eventDetails.getRouterKey();
         }
-        rabbitTemplate.convertAndSend(eventDetails.getExchange(), routerName, message);
-        LOG.info(String.format("New contract event sent: [%s] to exchange [%s] with routing key [%s]",
+        if(routerName != null && !routerName.isEmpty()){
+            rabbitTemplate.convertAndSend(eventDetails.getExchange(), routerName, message);
+            LOG.info(String.format("New contract event sent: [%s] to exchange [%s] with routing key [%s]",
                 JSON.stringify(message),
                 eventDetails.getExchange(),
                 routerName));
+            return;
+        }
+        LOG.info(String.format("New contract event sent: [%s] lack rabbitmq router",
+                JSON.stringify(message)));
     }
 
     @Override
