@@ -65,16 +65,21 @@ public class ContractEventFilterEndpoint {
      * @param eventFilter the event filter to add
      * @param response the http response
      */
+    // @RequestMapping(method = RequestMethod.POST, value = "batch")
+    // public AddEventFilterResponse addBatchEventFilterDynamicly(@RequestBody ContractEventFilterList eventFilterList,
+    //                                              HttpServletResponse response) {
+    //     final List<ContractEventFilter> registeredFilters = filterService.registerContractEventFilters(eventFilterList, true);
+    //     response.setStatus(HttpServletResponse.SC_ACCEPTED);
+    //     String successIds ="";
+    //     for (ContractEventFilter registeredFilter : registeredFilters) {
+    //         successIds = successIds + registeredFilter.getId() + ";";
+    //     }
+    //     return new AddEventFilterResponse(successIds);
+    // }
+
     @RequestMapping(method = RequestMethod.POST, value = "batch")
-    public AddEventFilterResponse addBatchEventFilterDynamicly(@RequestBody ContractEventFilterList eventFilterList,
-                                                 HttpServletResponse response) {
-        final List<ContractEventFilter> registeredFilters = filterService.registerContractEventFilters(eventFilterList, true);
-        response.setStatus(HttpServletResponse.SC_ACCEPTED);
-        String successIds ="";
-        for (ContractEventFilter registeredFilter : registeredFilters) {
-            successIds = successIds + registeredFilter.getId() + ";";
-        }
-        return new AddEventFilterResponse(successIds);
+    public void addBatchEventFilterDynamicly(@RequestBody ContractEventFilterList eventFilterList) {
+        filterService.registerContractEventFilters(eventFilterList, true);
     }
 
     /**
