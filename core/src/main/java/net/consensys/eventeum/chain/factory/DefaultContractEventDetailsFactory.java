@@ -104,7 +104,7 @@ public class DefaultContractEventDetailsFactory implements ContractEventDetailsF
             final ContractEventDetails eventDetails = new ContractEventDetails();
             eventDetails.setName(eventSpec.getEventName());
             eventDetails.setFilterId(eventFilter.getId());
-            eventDetails.setAddress(Keys.toChecksumAddress(log.getAddress()));
+            eventDetails.setAddress(eventFilter.getContractAddress());
             eventDetails.setLogIndex(log.getLogIndex());
             eventDetails.setTransactionHash(log.getTransactionHash());
             eventDetails.setBlockNumber(log.getBlockNumber());
@@ -170,24 +170,14 @@ public class DefaultContractEventDetailsFactory implements ContractEventDetailsF
     }
 
     private boolean isContractFilterMachLog(ContractEventFilter eventFilter, Log ethLog){
-
-        // log.info("******  start compare:");
-
         List<String> topics = ethLog.getTopics();
         ContractEventSpecification eventSpec = eventFilter.getEventSpecification();
-        String logContractAddress = Keys.toChecksumAddress(ethLog.getAddress());
-        String filterContractAddress = Keys.toChecksumAddress(eventFilter.getContractAddress());
         String eventTopic = Web3jUtil.getSignature(eventSpec);
-
-        // log.info("filter contract address: {}", filterContractAddress);
-        // log.info("filter topic: {}", eventTopic);
-        // log.info("log contract address: {}", logContractAddress);
-        // log.info("log topic: {}", topics.get(0));
-        
-        // if(topics.get(0).compareTo(eventTopic) == 0){
-        //     log.info("match success");
-        // }
-        // log.info("******  end compare:");
-        return logContractAddress.compareTo(filterContractAddress) == 0 && topics.get(0).compareTo(eventTopic) == 0;
+        if(topics.get(0).compareTo(eventTopic) != 0){
+            return false;
+        }
+        String logContractAddress = Keys.toChecksumAddress(ethLog.getAddress());
+        String filterContractAddress = eventFilter.getContractAddress();
+        return logContractAddress.compareTo(filterContractAddress) == 0;
     }
 }

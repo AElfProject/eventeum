@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import org.web3j.crypto.Keys;
 
 /**
  * {@inheritDoc}
@@ -222,6 +223,7 @@ public class DefaultSubscriptionService implements SubscriptionService {
         }
         Map<String, Boolean> map = new HashMap<>();
         for (ContractEventFilter filter : unRegisterredFilters) {
+            filter.setContractAddress(Keys.toChecksumAddress(filter.getContractAddress()));
             filterSubscriptions.put(filter.getId(), filter);
             saveContractEventFilter(filter);
             if (broadcast) {
