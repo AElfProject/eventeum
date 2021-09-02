@@ -109,7 +109,7 @@ public class DefaultContractEventDetailsFactory implements ContractEventDetailsF
             eventDetails.setTransactionHash(log.getTransactionHash());
             eventDetails.setBlockNumber(log.getBlockNumber());
             eventDetails.setBlockHash(log.getBlockHash());
-            eventDetails.setEventSpecificationSignature(Web3jUtil.getSignature(eventSpec));
+            eventDetails.setEventSpecificationSignature(log.getTopics().get(0));
             eventDetails.setNetworkName(this.networkName);
             eventDetails.setNodeName(eventFilter.getNode());
             eventDetails.setData(log.getData());
