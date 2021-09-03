@@ -269,6 +269,28 @@ public class Web3jService implements BlockchainService {
         }
     }
 
+    public List<ContractEventDetails> getEventsForFilter(List<ContractEventFilter> eventFilters, BigInteger blockNumber) {
+
+        try {
+
+            List<String> contractAddressList = new ArrayList<String>(eventFilters
+        .stream()
+        .collect(Collectors.groupingBy(x -> x.getContractAddress()))
+        .keySet());
+        final EthFilter ethFilter = new EthFilter(new DefaultBlockParameterNumber(blockNumber),
+            new DefaultBlockParameterNumber(blockNumber), contractAddressList);
+
+            final EthLog ethLog = web3j.ethGetLogs(ethFilter).send();
+
+            return ethLog.getLogs()
+                    .stream()
+                    .map(log -> eventDetailsFactory.createEventDetailsByEventFilter(eventFilters, (Log) log))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new BlockchainException("Error when obtaining logs from block: " + blockNumber, e);
+        }
+    }
+
     @Override
     public String getRevertReason(String from, String to, BigInteger blockNumber, String input) {
         try {

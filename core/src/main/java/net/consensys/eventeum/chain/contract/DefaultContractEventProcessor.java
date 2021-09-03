@@ -27,6 +27,7 @@ import net.consensys.eventeum.utils.ExecutorNameFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -41,13 +42,29 @@ public class DefaultContractEventProcessor implements ContractEventProcessor {
 
     private List<ContractEventListener> contractEventListeners;
 
+    // @Override
+    // public void processLogsInBlock(Block block, List<ContractEventFilter> contractEventFilters) {
+    //     asyncTaskService.executeWithCompletableFuture(ExecutorNameFactory.build(EVENT_EXECUTOR_NAME, block.getNodeName()), () -> {
+    //         final BlockchainService blockchainService = getBlockchainService(block.getNodeName());
+
+    //         contractEventFilters
+    //                 .forEach(filter -> processLogsForFilter(filter, block, blockchainService));
+    //     }).join();
+    // }
+
     @Override
     public void processLogsInBlock(Block block, List<ContractEventFilter> contractEventFilters) {
         asyncTaskService.executeWithCompletableFuture(ExecutorNameFactory.build(EVENT_EXECUTOR_NAME, block.getNodeName()), () -> {
             final BlockchainService blockchainService = getBlockchainService(block.getNodeName());
-
-            contractEventFilters
-                    .forEach(filter -> processLogsForFilter(filter, block, blockchainService));
+            List<ContractEventFilter> validContractEventFilters = contractEventFilters
+            .stream()
+            .filter(filter -> block.getNodeName().equals(filter.getNode())
+            && isEventFilterInBloomFilter(filter, block.getLogsBloom()))
+            .collect(Collectors.toList());
+            blockchainService.getEventsForFilter(validContractEventFilters, block.getNumber()).forEach(event -> {
+                event.setTimestamp(block.getTimestamp());
+                triggerListeners(event);
+            });
         }).join();
     }
 

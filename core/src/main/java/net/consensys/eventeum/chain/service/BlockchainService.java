@@ -99,6 +99,7 @@ public interface BlockchainService {
     public Optional<Block> getBlock(String blockHash, boolean fullTransactionObjects);
 
     List<ContractEventDetails> getEventsForFilter(ContractEventFilter filter, BigInteger blockNumber);
+    List<ContractEventDetails> getEventsForFilter(List<ContractEventFilter> filter, BigInteger blockNumber);
 
     /**
      * Obtain the transaction receipt for a specified transaction id.
