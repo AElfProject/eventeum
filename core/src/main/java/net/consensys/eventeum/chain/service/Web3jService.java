@@ -162,7 +162,7 @@ public class Web3jService implements BlockchainService {
                 });
 
         final Disposable sub = flowable.subscribe(theLog -> {
-            asyncTaskService.execute(ExecutorNameFactory.build(EVENT_EXECUTOR_NAME, eventFilter.getNode()), () -> {
+            asyncTaskService.executeWithLimitation(ExecutorNameFactory.build(EVENT_EXECUTOR_NAME, eventFilter.getNode()), () -> {
                 log.debug("Dispatching log: {}", theLog);
 
                 //Check signatures match

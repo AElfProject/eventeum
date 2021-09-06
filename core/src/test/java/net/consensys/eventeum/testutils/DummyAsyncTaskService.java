@@ -30,6 +30,11 @@ public class DummyAsyncTaskService implements AsyncTaskService {
     }
 
     @Override
+    public void executeWithLimitation(String executorName, Runnable task) {
+        task.run();
+    }
+
+    @Override
     public CompletableFuture<Void> executeWithCompletableFuture(String executorName, Runnable task) {
         return null;
     }

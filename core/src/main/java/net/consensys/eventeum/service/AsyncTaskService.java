@@ -17,6 +17,7 @@ package net.consensys.eventeum.service;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+import net.consensys.eventeum.service.sync.MyAction;
 
 /**
  * An service that should execute a task in an Asynchronous manner.
@@ -27,7 +28,9 @@ public interface AsyncTaskService {
 
     void execute(String executorName, Runnable task);
 
-    CompletableFuture<Void> executeWithCompletableFuture(String executorName, Runnable task);
+    void executeWithLimitation(String executorName,  MyAction task);
+
+    CompletableFuture<Void> executeWithCompletableFuture(String executorName, Runnable action);
 
     <T> Future<T> submit(String executorName, Callable<T> task);
 }

@@ -101,7 +101,7 @@ public abstract class AbstractBlockSubscriptionStrategy<T> implements BlockSubsc
     }
 
     protected void triggerListeners(Block eventeumBlock) {
-        asyncService.execute(ExecutorNameFactory.build(BLOCK_EXECUTOR_NAME, eventeumBlock.getNodeName()), () -> {
+        asyncService.executeWithLimitation(ExecutorNameFactory.build(BLOCK_EXECUTOR_NAME, eventeumBlock.getNodeName()), () -> {
             final BigInteger expectedBlock = BigInteger.valueOf(lastBlockNumberProcessed.get()).add(BigInteger.ONE);
 
             //A lower or equal block is valid due to forking or replaying on failure
