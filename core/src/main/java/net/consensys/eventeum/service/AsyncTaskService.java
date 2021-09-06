@@ -32,5 +32,7 @@ public interface AsyncTaskService {
 
     CompletableFuture<Void> executeWithCompletableFuture(String executorName, Runnable action);
 
+    void executeWithCompletableFutureWithLimitation(String executorName, Runnable action);
+
     <T> Future<T> submit(String executorName, Callable<T> task);
 }

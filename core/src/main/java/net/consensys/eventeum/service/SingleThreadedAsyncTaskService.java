@@ -33,6 +33,7 @@ public class SingleThreadedAsyncTaskService implements AsyncTaskService {
 
     private Map<String, ExecutorService> executorServices = new HashMap<>();
     private Map<String, AtomicInteger> taskLimitationsMap = new HashMap<>();
+    private Map<String, CompletableFuture<Void>> lastTaskMap = new HashMap<>();
 
     @Override
     public void execute(String executorName, Runnable task) {
@@ -82,6 +83,21 @@ public class SingleThreadedAsyncTaskService implements AsyncTaskService {
     @Override
     public CompletableFuture<Void> executeWithCompletableFuture(String executorName, Runnable task) {
         return CompletableFuture.runAsync(task, getOrCreateExecutor(executorName));
+    }
+
+    @Override
+    public void executeWithCompletableFutureWithLimitation(String executorName, Runnable task) {
+        if (!taskLimitationsMap.containsKey(executorName)) {
+            taskLimitationsMap.put(executorName, new AtomicInteger(0));
+        }
+        int currentTaskCount = taskLimitationsMap.get(executorName).get();
+        if(currentTaskCount > 5){
+            lastTaskMap.get(executorName).join();
+            taskLimitationsMap.put(executorName, new AtomicInteger(0));
+        }
+        CompletableFuture<Void> currentTask = CompletableFuture.runAsync(task, getOrCreateExecutor(executorName));
+        lastTaskMap.put(executorName, currentTask);
+        taskLimitationsMap.get(executorName).getAndIncrement();
     }
 
     private ExecutorService getOrCreateExecutor(String executorName) {

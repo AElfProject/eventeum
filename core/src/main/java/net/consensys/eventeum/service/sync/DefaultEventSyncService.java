@@ -88,7 +88,7 @@ public class DefaultEventSyncService implements EventSyncService {
         }
         ContractEventFilter firstFilter = filters.get(0);
         String nodeName = firstFilter.getNode();
-        asyncService.executeWithLimitation(ExecutorNameFactory.build(BLOCK_EXECUTOR_NAME, nodeName), () -> {            
+        asyncService.executeWithCompletableFutureWithLimitation(ExecutorNameFactory.build(BLOCK_EXECUTOR_NAME, nodeName), () -> {            
             final BigInteger latestBlockNumber = blockNumberService.getTheLatestBlock(nodeName);
             if (latestBlockNumber.equals(BigInteger.ZERO)) {
                 log.info("====== Syncing latest block number is 0");
