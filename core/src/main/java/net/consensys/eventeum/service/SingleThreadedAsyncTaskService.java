@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import net.consensys.eventeum.service.sync.MyAction;
 
 /**
  * An async task service that utilises a single thread executor
@@ -30,10 +32,46 @@ import java.util.concurrent.*;
 public class SingleThreadedAsyncTaskService implements AsyncTaskService {
 
     private Map<String, ExecutorService> executorServices = new HashMap<>();
+    private Map<String, AtomicInteger> taskLimitationsMap = new HashMap<>();
 
     @Override
     public void execute(String executorName, Runnable task) {
         getOrCreateExecutor(executorName).execute(task);
+    }
+
+    @Override
+    public void executeWithLimitation(String executorName, MyAction action){
+        if (!taskLimitationsMap.containsKey(executorName)) {
+            taskLimitationsMap.put(executorName, new AtomicInteger(0));
+        }
+        while(true){
+            int currentTaskCount = taskLimitationsMap.get(executorName).get();
+            System.out.println("======" + executorName + " current exection count is: " + currentTaskCount);
+
+            if(currentTaskCount < 10){
+                System.out.println("====== break");
+                break;
+            }
+            try{
+                Thread.sleep(1000);
+            }
+            catch(Exception exception){
+            }
+        }
+        int taskCount = taskLimitationsMap.get(executorName).getAndIncrement();
+        System.out.println("====== before: " + (taskCount));
+        getOrCreateExecutor(executorName).execute(new Runnable(){
+            public void run(){
+                try{
+                    action.invoke();
+                }
+                catch(Exception exception){
+                    System.out.println(exception.getMessage());
+                }
+                int taskCount = taskLimitationsMap.get(executorName).getAndDecrement();
+                System.out.println("====== after: " + (taskCount));
+            }
+        });
     }
 
     @Override
