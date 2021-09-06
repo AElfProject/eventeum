@@ -45,4 +45,5 @@ public class Node {
     private BigInteger initialStartBlock;
     private BigInteger numBlocksToReplay;
     private BigInteger maxBlocksToSync;
+    private Integer maxBlockCacheCount;
 }

@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import net.consensys.eventeum.chain.settings.NodeSettings;
 import net.consensys.eventeum.service.sync.MyAction;
 
 /**
@@ -31,9 +33,19 @@ import net.consensys.eventeum.service.sync.MyAction;
 @Component("asyncTaskService")
 public class SingleThreadedAsyncTaskService implements AsyncTaskService {
 
-    private Map<String, ExecutorService> executorServices = new HashMap<>();
-    private Map<String, AtomicInteger> taskLimitationsMap = new HashMap<>();
-    private Map<String, CompletableFuture<Void>> lastTaskMap = new HashMap<>();
+    private Map<String, ExecutorService> executorServices;
+    private Map<String, AtomicInteger> taskLimitationsMap;
+    private Map<String, CompletableFuture<Void>> lastTaskMap;
+    private Map<String, Integer> blockCacheCountMap;
+    private NodeSettings nodeSettings;
+
+    public SingleThreadedAsyncTaskService(NodeSettings nodeSettings) {
+        executorServices = new HashMap<>();
+        taskLimitationsMap = new HashMap<>();
+        lastTaskMap = new HashMap<>();
+        blockCacheCountMap = new HashMap<>();
+        this.nodeSettings = nodeSettings;
+    }
 
     @Override
     public void execute(String executorName, Runnable task) {
@@ -47,10 +59,9 @@ public class SingleThreadedAsyncTaskService implements AsyncTaskService {
         }
         while(true){
             int currentTaskCount = taskLimitationsMap.get(executorName).get();
-            System.out.println("======" + executorName + " current exection count is: " + currentTaskCount);
+            System.out.println(executorName + " current exection count is: " + currentTaskCount);
 
             if(currentTaskCount < 5){
-                System.out.println("====== break");
                 break;
             }
             try{
@@ -59,8 +70,7 @@ public class SingleThreadedAsyncTaskService implements AsyncTaskService {
             catch(Exception exception){
             }
         }
-        int taskCount = taskLimitationsMap.get(executorName).getAndIncrement();
-        System.out.println("====== before: " + (taskCount));
+        taskLimitationsMap.get(executorName).getAndIncrement();
         getOrCreateExecutor(executorName).execute(new Runnable(){
             public void run(){
                 try{
@@ -69,8 +79,7 @@ public class SingleThreadedAsyncTaskService implements AsyncTaskService {
                 catch(Exception exception){
                     System.out.println(exception.getMessage());
                 }
-                int taskCount = taskLimitationsMap.get(executorName).getAndDecrement();
-                System.out.println("====== after: " + (taskCount));
+                taskLimitationsMap.get(executorName).getAndDecrement();
             }
         });
     }
@@ -90,8 +99,16 @@ public class SingleThreadedAsyncTaskService implements AsyncTaskService {
         if (!taskLimitationsMap.containsKey(executorName)) {
             taskLimitationsMap.put(executorName, new AtomicInteger(0));
         }
+        if(!blockCacheCountMap.containsKey(executorName)){
+            String nodeName = executorName.split("-")[1];
+            Integer blockCacheCount = nodeSettings.getNode(nodeName).getMaxBlockCacheCount();
+            blockCacheCountMap.put(executorName, blockCacheCount);
+            System.out.println("=====" + nodeName + " cache count is :" + blockCacheCount);
+        }
+        int maxCachedBlockCount = blockCacheCountMap.get(executorName);
         int currentTaskCount = taskLimitationsMap.get(executorName).get();
-        if(currentTaskCount > 5){
+        
+        if(currentTaskCount > maxCachedBlockCount){
             lastTaskMap.get(executorName).join();
             taskLimitationsMap.put(executorName, new AtomicInteger(0));
         }

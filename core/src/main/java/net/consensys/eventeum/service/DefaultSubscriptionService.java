@@ -221,7 +221,6 @@ public class DefaultSubscriptionService implements SubscriptionService {
             log.error("repeat filters register");
             return new ArrayList<ContractEventFilter>();
         }
-        Map<String, Boolean> map = new HashMap<>();
         for (ContractEventFilter filter : unRegisterredFilters) {
             filter.setContractAddress(Keys.toChecksumAddress(filter.getContractAddress()));
             filterSubscriptions.put(filter.getId(), filter);

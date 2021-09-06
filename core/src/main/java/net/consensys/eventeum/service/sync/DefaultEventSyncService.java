@@ -91,11 +91,11 @@ public class DefaultEventSyncService implements EventSyncService {
         asyncService.executeWithCompletableFutureWithLimitation(ExecutorNameFactory.build(BLOCK_EXECUTOR_NAME, nodeName), () -> {            
             final BigInteger latestBlockNumber = blockNumberService.getTheLatestBlock(nodeName);
             if (latestBlockNumber.equals(BigInteger.ZERO)) {
-                log.info("====== Syncing latest block number is 0");
+                log.info("syncing latest block number is 0");
                 return;
             }
             final BigInteger startBlock = filterList.getStartBlock();
-            log.info("====== Syncing event filters from block {} to {}", startBlock, latestBlockNumber);
+            log.info("syncing event filters from block {} to {}", startBlock, latestBlockNumber);
 
             if (startBlock.compareTo(latestBlockNumber) > 0) {
                 for (ContractEventFilter filter : filters) {
@@ -103,18 +103,12 @@ public class DefaultEventSyncService implements EventSyncService {
                     finalSyncStatus.setSyncStatus(SyncStatus.SYNCED);
                     syncStatusRepository.save(finalSyncStatus);
                 }
-                log.info("======= Syncing latest block is less than start block");
+                log.info("syncing latest block is less than start block");
                 return;
             }
 
             eventRetriever.retrieveEventsWithBlockTimestamp(filterList, startBlock, latestBlockNumber,
-                    (events) -> events.forEach(this::processEvent));    
-            for (ContractEventFilter filter : filters) {
-                EventFilterSyncStatus finalSyncStatus = getEventSyncStatus(filter.getId());
-                finalSyncStatus.setSyncStatus(SyncStatus.SYNCED);
-                syncStatusRepository.save(finalSyncStatus);
-                log.info("Event filter with id {} has completed syncing", filter.getId());
-            }       
+                    (events) -> events.forEach(this::dynamicProcessEvent));     
         });
     }
 
@@ -148,6 +142,15 @@ public class DefaultEventSyncService implements EventSyncService {
 
         syncStatus.setLastBlockNumber(contractEvent.getBlockNumber());
         syncStatusRepository.save(syncStatus);
+    }
+
+    private void dynamicProcessEvent(ContractEventDetails contractEvent) {
+        contractEventProcessor.processContractEvent(contractEvent);
+        final EventFilterSyncStatus syncStatus = getEventSyncStatus(contractEvent.getFilterId());
+        syncStatus.setSyncStatus(SyncStatus.SYNCED);
+        syncStatus.setLastBlockNumber(contractEvent.getBlockNumber());
+        syncStatusRepository.save(syncStatus);
+        log.info("Event filter with id {} has completed syncing on block: {}", contractEvent.getFilterId(), contractEvent.getBlockNumber());
     }
 
     private EventFilterSyncStatus getEventSyncStatus(String id) {

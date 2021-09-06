@@ -48,6 +48,7 @@ public class NodeSettings {
     private static final String DEFAULT_NUM_BLOCKS_TO_REPLAY = "12";
 
     private static final String DEFAULT_MAX_BLOCKS_TO_SYNC = "0";
+    private static final String DEFAULT_MAX_BLOCKS_CACHE_COUNT = "10";
 
     private static final String ATTRIBUTE_PREFIX = "ethereum";
 
@@ -103,6 +104,10 @@ public class NodeSettings {
 
     private static final String GLOBAL_MAX_BLOCKS_TO_SYNC_ATTRIBUTE = ATTRIBUTE_PREFIX + "." + MAX_BLOCKS_TO_SYNC_ATTRIBUTE;
 
+    private static final String MAX_BLOCK_CACHE_COUNT = "maxBlockCacheCount";
+
+    private static final String GLOBAL_MAX_BLOCK_CACHE_COUNT_ATTRIBUTE = ATTRIBUTE_PREFIX + "." + MAX_BLOCK_CACHE_COUNT;
+
     private HashMap<String, Node> nodes;
 
     private String blockStrategy;
@@ -142,7 +147,8 @@ public class NodeSettings {
                     getBlocksToWaitForMissingTxProperty(environment, index),
                     getInitialStartBlockProperty(environment, index),
                     getNumBlocksToReplayProperty(environment, index),
-                    getMaxBlocksToSyncProperty(environment, index)
+                    getMaxBlocksToSyncProperty(environment, index),
+                    getMaxBlockCacheCountProperty(environment, index)
             );
 
             nodes.put(nodeName, node);
@@ -302,6 +308,19 @@ public class NodeSettings {
         }
 
         return BigInteger.valueOf(Long.valueOf(maxBlocksToSync));
+    }
+
+
+    private Integer getMaxBlockCacheCountProperty(Environment environment, int index) {
+        String maxBlocksCacheCount =
+                getProperty(environment, buildNodeAttribute(GLOBAL_MAX_BLOCK_CACHE_COUNT_ATTRIBUTE, index));
+
+        if (maxBlocksCacheCount == null) {
+            maxBlocksCacheCount = getProperty(environment,
+            GLOBAL_MAX_BLOCK_CACHE_COUNT_ATTRIBUTE, DEFAULT_MAX_BLOCKS_CACHE_COUNT);
+        }
+
+        return Integer.valueOf(maxBlocksCacheCount);
     }
 
     private String getNodeUsernameProperty(Environment environment, int index) {
