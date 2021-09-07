@@ -63,7 +63,6 @@ public class EventFilterConfiguration {
                 if (configFilter.getCorrelationId() != null) {
                     contractEventFilter.setCorrelationIdStrategy(configFilter.getCorrelationId().toStrategy());
                 }
-                contractEventFilter.setContractAddress(Keys.toChecksumAddress(contractEventFilter.getContractAddress()));
                 filtersToReturn.add(contractEventFilter);
             });
         }
