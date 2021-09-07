@@ -104,9 +104,9 @@ public class NodeSettings {
 
     private static final String GLOBAL_MAX_BLOCKS_TO_SYNC_ATTRIBUTE = ATTRIBUTE_PREFIX + "." + MAX_BLOCKS_TO_SYNC_ATTRIBUTE;
 
-    private static final String MAX_BLOCK_CACHE_COUNT = "maxBlockCacheCount";
+    private static final String MAX_BLOCK_CACHE_COUNT_ATTRIBUTE = "maxBlockCacheCount";
 
-    private static final String GLOBAL_MAX_BLOCK_CACHE_COUNT_ATTRIBUTE = ATTRIBUTE_PREFIX + "." + MAX_BLOCK_CACHE_COUNT;
+    private static final String GLOBAL_MAX_BLOCK_CACHE_COUNT_ATTRIBUTE = ATTRIBUTE_PREFIX + "." + MAX_BLOCK_CACHE_COUNT_ATTRIBUTE;
 
     private HashMap<String, Node> nodes;
 
@@ -313,7 +313,7 @@ public class NodeSettings {
 
     private Integer getMaxBlockCacheCountProperty(Environment environment, int index) {
         String maxBlocksCacheCount =
-                getProperty(environment, buildNodeAttribute(GLOBAL_MAX_BLOCK_CACHE_COUNT_ATTRIBUTE, index));
+                getProperty(environment, buildNodeAttribute(MAX_BLOCK_CACHE_COUNT_ATTRIBUTE, index));
 
         if (maxBlocksCacheCount == null) {
             maxBlocksCacheCount = getProperty(environment,
