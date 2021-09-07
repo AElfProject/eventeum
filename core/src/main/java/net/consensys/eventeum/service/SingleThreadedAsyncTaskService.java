@@ -109,8 +109,9 @@ public class SingleThreadedAsyncTaskService implements AsyncTaskService {
         int currentTaskCount = taskLimitationsMap.get(executorName).get();
         
         if(currentTaskCount > maxCachedBlockCount){
+            System.out.println("===== begin to start last task complete");
             lastTaskMap.get(executorName).join();
-            taskLimitationsMap.put(executorName, new AtomicInteger(0));
+            taskLimitationsMap.get(executorName).set(0);
         }
         CompletableFuture<Void> currentTask = CompletableFuture.runAsync(task, getOrCreateExecutor(executorName));
         lastTaskMap.put(executorName, currentTask);
