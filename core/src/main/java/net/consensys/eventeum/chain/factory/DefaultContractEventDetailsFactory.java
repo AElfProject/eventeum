@@ -37,10 +37,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import lombok.extern.slf4j.Slf4j;
-import lombok.AllArgsConstructor;
-
-@Slf4j
 public class DefaultContractEventDetailsFactory implements ContractEventDetailsFactory {
 
     private EventParameterConverter<Type> parameterConverter;

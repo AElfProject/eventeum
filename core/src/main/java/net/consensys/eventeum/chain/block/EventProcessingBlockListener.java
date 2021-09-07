@@ -13,32 +13,22 @@
  */
 
 package net.consensys.eventeum.chain.block;
-
-import lombok.extern.slf4j.Slf4j;
 import net.consensys.eventeum.chain.contract.ContractEventProcessor;
 import net.consensys.eventeum.chain.service.domain.Block;
-import net.consensys.eventeum.dto.event.filter.ContractEventFilter;
 import net.consensys.eventeum.service.SubscriptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.util.List;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Component
-@Slf4j
 public class EventProcessingBlockListener implements BlockListener {
 
     @Lazy
     private SubscriptionService subscriptionService;
-
     private ContractEventProcessor contractEventProcessor;
-    private static final Logger logger = LoggerFactory.getLogger(EventProcessingBlockListener.class);
-
     @Autowired
     public EventProcessingBlockListener(@Lazy SubscriptionService subscriptionService,
                                         ContractEventProcessor contractEventProcessor) {
@@ -48,10 +38,6 @@ public class EventProcessingBlockListener implements BlockListener {
 
     @Override
     public void onBlock(Block block) {
-        // List<ContractEventFilter> filters = subscriptionService.listContractEventFilters();
-        // filters.forEach(filter -> {
-        //     log.info("=== web3 block event filter with id {} address {} from block {}", filter.getId(), filter.getContractAddress(), block.getNumber());
-        // });
         contractEventProcessor.processLogsInBlock(block, subscriptionService.listContractEventFilters());
     }
 }
