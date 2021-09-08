@@ -52,7 +52,7 @@ public class RabbitBlockChainEventBroadcaster implements BlockchainEventBroadcas
 
     @Override
     public void broadcastNewBlock(BlockDetails block) {
-        if(this.rabbitSettings.getExchange() == null || this.rabbitSettings.getExchange().isEmpty()){
+        if(this.rabbitSettings.getBlockEventsRoutingKey() == null || this.rabbitSettings.getBlockEventsRoutingKey().isEmpty()){
             return;
         }
         final EventeumMessage<BlockDetails> message = createBlockEventMessage(block);
@@ -91,18 +91,21 @@ public class RabbitBlockChainEventBroadcaster implements BlockchainEventBroadcas
 
     @Override
     public void broadcastTransaction(TransactionDetails transactionDetails) {
-        // final EventeumMessage<TransactionDetails> message = createTransactionEventMessage(transactionDetails);
-        // rabbitTemplate.convertAndSend(this.rabbitSettings.getExchange(),
-        //         String.format("%s.%s", this.rabbitSettings.getTransactionEventsRoutingKey(), transactionDetails.getHash()),
-        //         message);
+        if(this.rabbitSettings.getTransactionEventsRoutingKey() == null || this.rabbitSettings.getTransactionEventsRoutingKey().isEmpty()){
+            return;
+        }
+        final EventeumMessage<TransactionDetails> message = createTransactionEventMessage(transactionDetails);
+        rabbitTemplate.convertAndSend(this.rabbitSettings.getExchange(),
+                String.format("%s.%s", this.rabbitSettings.getTransactionEventsRoutingKey(), transactionDetails.getHash()),
+                message);
 
-        // LOG.info(String.format("New transaction event sent: [%s] to exchange [%s] with routing key [%s.%s]",
-        //         JSON.stringify(message),
-        //         this.rabbitSettings.getExchange(),
-        //         this.rabbitSettings.getTransactionEventsRoutingKey(),
-        //         transactionDetails.getHash()
-        //         )
-        // );
+        LOG.info(String.format("New transaction event sent: [%s] to exchange [%s] with routing key [%s.%s]",
+                JSON.stringify(message),
+                this.rabbitSettings.getExchange(),
+                this.rabbitSettings.getTransactionEventsRoutingKey(),
+                transactionDetails.getHash()
+                )
+        );
     }
 
     protected EventeumMessage<BlockDetails> createBlockEventMessage(BlockDetails blockDetails) {
