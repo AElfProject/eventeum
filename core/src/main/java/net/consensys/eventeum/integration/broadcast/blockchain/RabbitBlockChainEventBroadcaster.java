@@ -52,16 +52,19 @@ public class RabbitBlockChainEventBroadcaster implements BlockchainEventBroadcas
 
     @Override
     public void broadcastNewBlock(BlockDetails block) {
-        // final EventeumMessage<BlockDetails> message = createBlockEventMessage(block);
-        // rabbitTemplate.convertAndSend(this.rabbitSettings.getExchange(),
-        //         String.format("%s", this.rabbitSettings.getBlockEventsRoutingKey()),
-        //         message);
+        if(this.rabbitSettings.getExchange() == null || this.rabbitSettings.getExchange().isEmpty()){
+            return;
+        }
+        final EventeumMessage<BlockDetails> message = createBlockEventMessage(block);
+        rabbitTemplate.convertAndSend(this.rabbitSettings.getExchange(),
+                String.format("%s", this.rabbitSettings.getBlockEventsRoutingKey()),
+                message);
 
-        // LOG.info(String.format("New block sent: [%s] to exchange [%s] with routing key [%s]",
-        //         JSON.stringify(message),
-        //         this.rabbitSettings.getExchange(),
-        //         this.rabbitSettings.getBlockEventsRoutingKey())
-        // );
+        LOG.info(String.format("New block sent: [%s] to exchange [%s] with routing key [%s]",
+                JSON.stringify(message),
+                this.rabbitSettings.getExchange(),
+                this.rabbitSettings.getBlockEventsRoutingKey())
+        );
     }
 
     @Override
