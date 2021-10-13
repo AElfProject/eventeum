@@ -16,6 +16,7 @@ package net.consensys.eventeum.testutils;
 
 import lombok.NoArgsConstructor;
 import net.consensys.eventeum.service.AsyncTaskService;
+import net.consensys.eventeum.service.sync.MyAction;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -30,8 +31,7 @@ public class DummyAsyncTaskService implements AsyncTaskService {
     }
 
     @Override
-    public void executeWithLimitation(String executorName, Runnable task) {
-        task.run();
+    public void executeWithLimitation(String executorName, MyAction task) {
     }
 
     @Override
