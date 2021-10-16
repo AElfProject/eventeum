@@ -69,7 +69,7 @@ eventFilters:
           type: ADDRESS
         - position: 3
           type: UINT256
-    #startBlock: 4100
+#    startBlock: 4100
     queueName: "bscQueue"
     routerKey: ""
     exchange: ""
@@ -97,12 +97,12 @@ broadcaster:
       numBlocksToWaitForMissingTx: 100
       numBlocksToWaitBeforeInvalidating: 2
   multiInstance: false
-  enableBlockNotifications: true
+  enableBlockNotifications: false
 
 rabbitmq:
   exchange: ""
   blockNotification: false
-  routingKey: 
+  routingKey:
     contractEvents: testOne
     blockEvents: EventOne
     transactionEvents: TxEventOne

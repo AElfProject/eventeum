@@ -24,9 +24,11 @@ import net.consensys.eventeum.dto.event.ContractEventDetails;
 import net.consensys.eventeum.dto.event.filter.ContractEventFilter;
 import net.consensys.eventeum.service.AsyncTaskService;
 import net.consensys.eventeum.utils.ExecutorNameFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 @Slf4j
 @Component
@@ -41,14 +43,23 @@ public class DefaultContractEventProcessor implements ContractEventProcessor {
 
     private List<ContractEventListener> contractEventListeners;
 
+    @Autowired
+    private AsyncContractEventProcessor asyncContractEventProcessor;
+
     @Override
     public void processLogsInBlock(Block block, List<ContractEventFilter> contractEventFilters) {
         asyncTaskService.executeWithCompletableFuture(ExecutorNameFactory.build(EVENT_EXECUTOR_NAME, block.getNodeName()), () -> {
             final BlockchainService blockchainService = getBlockchainService(block.getNodeName());
+            final CountDownLatch countDownLatch = new CountDownLatch(contractEventFilters.size());
 
             contractEventFilters
-                    .forEach(filter -> processLogsForFilter(filter, block, blockchainService));
-        }).join();
+                    .forEach(filter -> asyncContractEventProcessor.processLogsForFilter(filter, block, blockchainService,contractEventListeners, countDownLatch));
+            try {
+                countDownLatch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
@@ -59,9 +70,9 @@ public class DefaultContractEventProcessor implements ContractEventProcessor {
     }
 
     private void processLogsForFilter(ContractEventFilter filter,
-                                      Block block,
-                                      BlockchainService blockchainService) {
-
+                              Block block,
+                              BlockchainService blockchainService,CountDownLatch countDownLatch) {
+        log.info("Thread:[{}] start processing contract:[{}]--event:[{}] event",Thread.currentThread().getName(),filter.getContractAddress(),filter.getEventSpecification().getEventName());
         if (block.getNodeName().equals(filter.getNode())
                 && isEventFilterInBloomFilter(filter, block.getLogsBloom())) {
             blockchainService
@@ -71,6 +82,8 @@ public class DefaultContractEventProcessor implements ContractEventProcessor {
                         triggerListeners(event);
                     });
         }
+        countDownLatch.countDown();
+        log.info("Thread:[{}] end processing contract:[{}]--event:[{}] event",Thread.currentThread().getName(),filter.getContractAddress(),filter.getEventSpecification().getEventName());
     }
 
     private boolean isEventFilterInBloomFilter(ContractEventFilter filter, String logsBloom) {
