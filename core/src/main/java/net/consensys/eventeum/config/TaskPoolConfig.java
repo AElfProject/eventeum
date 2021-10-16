@@ -1,4 +1,4 @@
-package net.consensys.eventeum.chain.config;
+package net.consensys.eventeum.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
