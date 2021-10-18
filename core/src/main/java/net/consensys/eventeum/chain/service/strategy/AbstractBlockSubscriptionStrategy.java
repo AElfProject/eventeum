@@ -23,6 +23,7 @@ import net.consensys.eventeum.chain.service.domain.wrapper.Web3jBlock;
 import net.consensys.eventeum.service.AsyncTaskService;
 import net.consensys.eventeum.utils.ExecutorNameFactory;
 import net.consensys.eventeum.utils.JSON;
+import org.springframework.util.StopWatch;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.EthBlock;
@@ -93,11 +94,15 @@ public abstract class AbstractBlockSubscriptionStrategy<T> implements BlockSubsc
     }
 
     protected void triggerListeners(T blockObject) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         final Block eventeumBlock = convertToEventeumBlock(blockObject);
 
         if (eventeumBlock != null) {
             triggerListeners(eventeumBlock);
         }
+        stopWatch.stop();
+        log.info("BlockNumber[{}]===================>[{}]",eventeumBlock.getNumber(),stopWatch.prettyPrint());
     }
 
     protected void triggerListeners(Block eventeumBlock) {

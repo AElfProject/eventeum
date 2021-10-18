@@ -33,7 +33,7 @@ public class AsyncContractEventProcessor{
                                      CountDownLatch countDownLatch) {
         this.contractEventListeners = contractEventListeners;
 
-        log.info("Thread:[{}] start processing contract:[{}]--event:[{}] event",Thread.currentThread().getName(),filter.getContractAddress(),filter.getEventSpecification().getEventName());
+//        log.info("BlockNumber:[{}] Thread:[{}]  event:[{}] CountDownLatch:[{}] contract:[{}]",block.getNumber(),Thread.currentThread().getName(),filter.getEventSpecification().getEventName(),countDownLatch.getCount()-1,filter.getContractAddress());
         if (block.getNodeName().equals(filter.getNode())
                 && isEventFilterInBloomFilter(filter, block.getLogsBloom())) {
             blockchainService
@@ -44,7 +44,7 @@ public class AsyncContractEventProcessor{
                     });
         }
         countDownLatch.countDown();
-        log.info("Thread:[{}] end processing contract:[{}]--event:[{}] event",Thread.currentThread().getName(),filter.getContractAddress(),filter.getEventSpecification().getEventName());
+//        log.info("Thread:[{}] end processing contract:[{}]--event:[{}] event",Thread.currentThread().getName(),filter.getContractAddress(),filter.getEventSpecification().getEventName());
     }
 
     private boolean isEventFilterInBloomFilter(ContractEventFilter filter, String logsBloom) {
