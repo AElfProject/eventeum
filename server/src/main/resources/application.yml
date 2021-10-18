@@ -73,6 +73,7 @@ eventFilters:
     queueName: "bscQueue"
     routerKey: ""
     exchange: ""
+    processorId: "PairCreatedProcessor"
 
 #transactionFilters:
 #- nodeName: ${ETHEREUM_NETWORK:default}

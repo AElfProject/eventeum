@@ -76,6 +76,7 @@ public class DefaultContractEventDetailsFactory implements ContractEventDetailsF
         eventDetails.setQueueName(eventFilter.getQueueName());
         eventDetails.setRouterKey(eventFilter.getRouterKey());
         eventDetails.setExchange(eventFilter.getExchange());
+        eventDetails.setProcessorId(eventFilter.getProcessorId());
         eventDetails.setTopics(log.getTopics());
 
         if (log.isRemoved()) {

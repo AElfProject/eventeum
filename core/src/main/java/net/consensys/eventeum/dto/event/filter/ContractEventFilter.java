@@ -60,4 +60,5 @@ public class ContractEventFilter {
     private String routerKey;
 
     private String exchange;
+    private String processorId;
 }
