@@ -22,14 +22,14 @@ public class TaskPoolConfig implements AsyncConfigurer {
     @Bean("taskExecutor")
     public Executor taskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(cpuNum);
-        taskExecutor.setMaxPoolSize(cpuNum*2);
-        taskExecutor.setQueueCapacity(Integer.MAX_VALUE);
+        taskExecutor.setCorePoolSize(cpuNum*2);
+        taskExecutor.setMaxPoolSize(100);
+        taskExecutor.setQueueCapacity(1000);
         taskExecutor.setKeepAliveSeconds(60);
         taskExecutor.setThreadNamePrefix("AsyncTaskExecutor--");
         taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
         taskExecutor.setAwaitTerminationSeconds(60);
-        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
+        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         taskExecutor.initialize();
         return taskExecutor;
     }
