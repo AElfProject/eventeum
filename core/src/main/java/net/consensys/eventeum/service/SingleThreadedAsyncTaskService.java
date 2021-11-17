@@ -59,8 +59,6 @@ public class SingleThreadedAsyncTaskService implements AsyncTaskService {
         }
         while(true){
             int currentTaskCount = taskLimitationsMap.get(executorName).get();
-            System.out.println(executorName + " current exection count is: " + currentTaskCount);
-
             if(currentTaskCount < 5){
                 break;
             }
@@ -95,7 +93,7 @@ public class SingleThreadedAsyncTaskService implements AsyncTaskService {
     }
 
     @Override
-    public void executeWithCompletableFutureWithLimitation(String executorName, Runnable task) {
+    public void executeWithCompletableFutureWithLimitation(String executorName, MyAction task) {
         if (!taskLimitationsMap.containsKey(executorName)) {
             taskLimitationsMap.put(executorName, new AtomicInteger(0));
         }
@@ -103,19 +101,22 @@ public class SingleThreadedAsyncTaskService implements AsyncTaskService {
             String nodeName = executorName.split("-")[1];
             Integer blockCacheCount = nodeSettings.getNode(nodeName).getMaxBlockCacheCount();
             blockCacheCountMap.put(executorName, blockCacheCount);
-            System.out.println("=====" + nodeName + " cache count is :" + blockCacheCount);
         }
         int maxCachedBlockCount = blockCacheCountMap.get(executorName);
         int currentTaskCount = taskLimitationsMap.get(executorName).get();
         
         if(currentTaskCount > maxCachedBlockCount){
-            System.out.println("===== begin to start last task complete");
             lastTaskMap.get(executorName).join();
             taskLimitationsMap.get(executorName).set(0);
         }
-        CompletableFuture<Void> currentTask = CompletableFuture.runAsync(task, getOrCreateExecutor(executorName));
+        // int currentTaskNumber = taskLimitationsMap.get(executorName).getAndIncrement();
+        // System.out.println("#####" + executorName + " prepare to execute " + currentTaskNumber);
+        CompletableFuture<Void> currentTask = CompletableFuture.runAsync(()-> {
+            task.invoke();
+            // int taskNumber = taskLimitationsMap.get(executorName).getAndDecrement();
+            // System.out.println("#####" + executorName + " finish executing " + taskNumber);
+        }, getOrCreateExecutor(executorName));
         lastTaskMap.put(executorName, currentTask);
-        taskLimitationsMap.get(executorName).getAndIncrement();
     }
 
     private ExecutorService getOrCreateExecutor(String executorName) {
