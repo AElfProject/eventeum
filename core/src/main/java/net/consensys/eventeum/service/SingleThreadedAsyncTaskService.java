@@ -109,11 +109,11 @@ public class SingleThreadedAsyncTaskService implements AsyncTaskService {
             lastTaskMap.get(executorName).join();
             taskLimitationsMap.get(executorName).set(0);
         }
-        // int currentTaskNumber = taskLimitationsMap.get(executorName).getAndIncrement();
+        taskLimitationsMap.get(executorName).getAndIncrement();
         // System.out.println("#####" + executorName + " prepare to execute " + currentTaskNumber);
         CompletableFuture<Void> currentTask = CompletableFuture.runAsync(()-> {
             task.invoke();
-            // int taskNumber = taskLimitationsMap.get(executorName).getAndDecrement();
+            taskLimitationsMap.get(executorName).getAndDecrement();
             // System.out.println("#####" + executorName + " finish executing " + taskNumber);
         }, getOrCreateExecutor(executorName));
         lastTaskMap.put(executorName, currentTask);
