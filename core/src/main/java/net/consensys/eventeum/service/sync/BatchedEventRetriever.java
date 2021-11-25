@@ -69,28 +69,39 @@ public class BatchedEventRetriever implements EventRetriever {
                                BigInteger startBlock,
                                BigInteger endBlock,
                                Consumer<List<ContractEventDetails>> eventConsumer) {
-
-        BigInteger batchStartBlock = startBlock;
-
-        while (batchStartBlock.compareTo(endBlock) < 0) {
-            BigInteger batchEndBlock;
-
-            if (batchStartBlock.add(settings.getSyncBatchSize()).compareTo(endBlock) >= 0) {
-                batchEndBlock = endBlock;
-            } else {
-                batchEndBlock = batchStartBlock.add(settings.getSyncBatchSize());
-            }
-
-            List<ContractEventFilter> filters = eventFilterList.getFilters();
-            ContractEventFilter firstFilter = filters.get(0);
-            final List<ContractEventDetails> events = servicesContainer
-                    .getNodeServices(firstFilter.getNode())
-                    .getBlockchainService()
-                    .retrieveEventsWithBlockTimestamp(filters, batchStartBlock, batchEndBlock);
-            eventConsumer.accept(events);
-
-            batchStartBlock = batchEndBlock.add(BigInteger.ONE);
+        List<ContractEventFilter> filters = eventFilterList.getFilters();
+        for (ContractEventFilter filter : filters) {
+            retrieveEvents(filter, startBlock, endBlock, eventConsumer);
         }
     }
+
+    // @Override
+    // public void retrieveEventsWithBlockTimestamp(ContractEventFilterList eventFilterList,
+    //                            BigInteger startBlock,
+    //                            BigInteger endBlock,
+    //                            Consumer<List<ContractEventDetails>> eventConsumer) {
+
+    //     BigInteger batchStartBlock = startBlock;
+
+    //     while (batchStartBlock.compareTo(endBlock) < 0) {
+    //         BigInteger batchEndBlock;
+
+    //         if (batchStartBlock.add(settings.getSyncBatchSize()).compareTo(endBlock) >= 0) {
+    //             batchEndBlock = endBlock;
+    //         } else {
+    //             batchEndBlock = batchStartBlock.add(settings.getSyncBatchSize());
+    //         }
+
+    //         List<ContractEventFilter> filters = eventFilterList.getFilters();
+    //         ContractEventFilter firstFilter = filters.get(0);
+    //         final List<ContractEventDetails> events = servicesContainer
+    //                 .getNodeServices(firstFilter.getNode())
+    //                 .getBlockchainService()
+    //                 .retrieveEventsWithBlockTimestamp(filters, batchStartBlock, batchEndBlock);
+    //         eventConsumer.accept(events);
+
+    //         batchStartBlock = batchEndBlock.add(BigInteger.ONE);
+    //     }
+    // }
 
 }
