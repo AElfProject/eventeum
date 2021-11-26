@@ -59,7 +59,7 @@ database:
 # type: SQL
 
 broadcaster:
-  type: KAFKA
+  type: RABBIT
   cache:
     expirationMillis: 6000000
   event:
